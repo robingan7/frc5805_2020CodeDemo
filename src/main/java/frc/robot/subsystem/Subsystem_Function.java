@@ -23,9 +23,9 @@ public abstract class Subsystem_Function{
 /*
     public abstract boolean checkSystem();
 
-    public abstract void outputTelemetry();
+    public abstract void outputTelemetry();*/
 
-    public abstract void stop();*/
+    public abstract void stop();
 
     public void zeroSensors() {}
 

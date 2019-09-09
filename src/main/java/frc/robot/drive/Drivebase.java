@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 
 import frc.robot.cycle.*;
-import frc.lib.motor.Maker;
+import frc.lib.motor.MotorUtil;
 import frc.robot.Constants;
 import frc.robot.subsystem.Subsystem_Function;
 
@@ -79,26 +79,26 @@ public class Drivebase extends Subsystem_Function{
     public Drivebase(){
         mFeedData=new FeedData();
          // Start all Talons in open loop mode.
-         mLeftMaster = Maker.createTalon( Constants.kLeftDriveMasterId);
+         mLeftMaster = MotorUtil.createTalon( Constants.kLeftDriveMasterId);
          configureMaster(mLeftMaster, true);
  
-         mLeftSlaveA = Maker.createVictor(Constants.kLeftDriveSlaveAId,
+         mLeftSlaveA = MotorUtil.createVictor(Constants.kLeftDriveSlaveAId,
                  Constants.kLeftDriveMasterId);
          mLeftSlaveA.setInverted(false);
  
-         mLeftSlaveB = Maker.createVictor(Constants.kLeftDriveSlaveBId,
+         mLeftSlaveB = MotorUtil.createVictor(Constants.kLeftDriveSlaveBId,
                  Constants.kLeftDriveMasterId);
          mLeftSlaveB.setInverted(false);
 
  
-         mRightMaster = Maker.createTalon(Constants.kRightDriveMasterId);
+         mRightMaster = MotorUtil.createTalon(Constants.kRightDriveMasterId);
          configureMaster(mRightMaster, true);
  
-         mRightSlaveA = Maker.createVictor(Constants.kRightDriveSlaveAId,
+         mRightSlaveA = MotorUtil.createVictor(Constants.kRightDriveSlaveAId,
                  Constants.kRightDriveMasterId);
          //mRightSlaveA.setInverted(true);
  
-         mRightSlaveB = Maker.createVictor(Constants.kRightDriveSlaveBId,
+         mRightSlaveB = MotorUtil.createVictor(Constants.kRightDriveSlaveBId,
                  Constants.kRightDriveMasterId);
          //mRightSlaveB.setInverted(true);
  
@@ -109,7 +109,7 @@ public class Drivebase extends Subsystem_Function{
                                         new SpeedControllerGroup(mRightMaster, mRightSlaveA,mRightSlaveB));
 
          
-         mShifter = Maker.makeSolenoidFromId(Constants.kShifterSolenoidId);
+         mShifter = MotorUtil.makeSolenoidFromId(Constants.kShifterSolenoidId);
 
          setGains();
  

@@ -4,10 +4,13 @@ import com.ctre.phoenix.ParamEnum;
 import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.ctre.phoenix.ErrorCode;
+
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DriverStation;
 
 
-public class Maker{
+public class MotorUtil{
     private final static int kTimeoutMs = 100;
 
     public static class Configuration {
@@ -42,5 +45,11 @@ public class Maker{
         return new Solenoid(solenoidId);
         
         //throw new IllegalArgumentException("Solenoid ID not valid: " + solenoidId);
+    }
+
+    public static void checkError(ErrorCode errorCode, String message) {
+        if (errorCode != ErrorCode.OK) {
+            DriverStation.reportError(message + errorCode, false);
+        }
     }
 }
