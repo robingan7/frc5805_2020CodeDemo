@@ -1,5 +1,9 @@
 package frc.robot.joystick_control;
 
+/**
+ * the main control board contains the driver and operator joystick
+ * and call their methods
+ */
 public class MainControlBoard{// implements IMainControlBoard
     private static MainControlBoard mInstance = null;
     private IDrive_Joystick mDrive_Joystick;
@@ -13,20 +17,17 @@ public class MainControlBoard{// implements IMainControlBoard
     }
 
     public MainControlBoard(){
-        mDrive_Joystick=Drive_Joystick.getInstance();
-        mIOperator_Joystick=Operator_Joystick.getInstance();
+        mDrive_Joystick  = Drive_Joystick.getInstance();
+        mIOperator_Joystick = Operator_Joystick.getInstance();
     }
 
     //methods below should override, I'm too lazy to override all methods so I didn't implement the interface
-    public double getSpeed(){
-        return mDrive_Joystick.getSpeed();
+    public IDrive_Joystick getDriverJoystick(){
+        return mDrive_Joystick;
     }
 
-    public double getTurn(){
-        return mDrive_Joystick.getTurn();
+    public IOperator_Joystick getOperatorJoystick(){
+        return mIOperator_Joystick;
     }
 
-    public boolean getQuickTurn(){
-        return mDrive_Joystick.getQuickTurn();
-    }
 }

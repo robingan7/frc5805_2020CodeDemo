@@ -1,11 +1,14 @@
-package frc.robot;
+package frc.robot.subsystem;
 
 import frc.robot.cycle.*;
-import frc.robot.Subsystem_Function;
 
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * cycle_in class that contains multiple cycles
+ * provides actual implementation for cycle
+ */
 public class Subsystem_Cycle_Manager implements ICycle_in{
    
     private final List<Subsystem_Function> mAllSubsystems;
@@ -16,6 +19,7 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
     }
 
     //---------EnabledLoop-----------
+    //provides actual implementation for cycle
     private class EnabledLoop implements Cycle {
 
         @Override
@@ -47,11 +51,12 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
     }
 
      //---------DisabledLoop-----------
+     //provides actual implementation for cycle
     private class DisabledLoop implements Cycle {
 
         @Override
         public void onStart(double timestamp) {
-
+            
         }
 
         @Override
@@ -72,15 +77,15 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
     public void registerEnabledLoops(Cycle_in enabledLooper) {
         mAllSubsystems.forEach((s) -> s.registerEnabledLoops(this));
-        enabledLooper.enableSubsystem(new EnabledLoop());
+        enabledLooper.addSubsystem(new EnabledLoop());
     }
 
     public void registerDisabledLoops(Cycle_in disabledLooper) {
-        disabledLooper.enableSubsystem(new DisabledLoop());
+        disabledLooper.addSubsystem(new DisabledLoop());
     }
 
     @Override
-    public void enableSubsystem(Cycle loop) {
+    public void addSubsystem(Cycle loop) {
         mCycle.add(loop);
     }
 

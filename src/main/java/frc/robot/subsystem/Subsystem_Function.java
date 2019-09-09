@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.subsystem;
 
 import frc.robot.cycle.ICycle_in;
 
@@ -13,16 +13,13 @@ import frc.robot.cycle.ICycle_in;
  * instantializing all member components at the start of the match.
  */
 public abstract class Subsystem_Function{
-    public void writeToLog() {
-    }
+    public void writeToLog() {}
 
-    // Optional design pattern for caching periodic reads to avoid hammering the HAL/CAN.
-    public void move_subsystem() {
-    }
+    // used to move susystem
+    public void move_subsystem() {}
 
-    // Optional design pattern for caching periodic writes to avoid hammering the HAL/CAN.
-    public void update_subsystem() {
-    }
+    //update subsystem's states used in feeding profile and PID
+    public void update_subsystem() {}
 /*
     public abstract boolean checkSystem();
 
@@ -30,9 +27,7 @@ public abstract class Subsystem_Function{
 
     public abstract void stop();*/
 
-    public void zeroSensors() {
-    }
+    public void zeroSensors() {}
 
-    public void registerEnabledLoops(ICycle_in enabledLooper) {
-    }
+    public void registerEnabledLoops(ICycle_in enabledLooper) {}
 }

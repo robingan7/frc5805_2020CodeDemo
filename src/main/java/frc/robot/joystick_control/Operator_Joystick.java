@@ -2,7 +2,7 @@ package frc.robot.joystick_control;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.Joystick;
 public class Operator_Joystick implements IOperator_Joystick{
-    private static Operator_Joystick mInstance=new Operator_Joystick();
+    private static final Operator_Joystick mInstance = new Operator_Joystick();
 
     public static Operator_Joystick getInstance(){
         return mInstance;
@@ -11,7 +11,7 @@ public class Operator_Joystick implements IOperator_Joystick{
     private Joystick mOperatorJoystick;
 
     private Operator_Joystick(){
-        mOperatorJoystick=new Joystick(Constants.driveJoystickid);
+        mOperatorJoystick = new Joystick(Constants.driveJoystickid);
     }
 
     @Override

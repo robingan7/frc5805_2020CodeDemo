@@ -1,6 +1,3 @@
-/**
- * @see https://github.com/Team254/FRC-2018-Public/blob/master/src/main/java/com/team254/lib/drivers/LazyTalonSRX.java
- */
 package frc.lib.motor;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -24,6 +21,8 @@ public class LazyTalonSRX extends WPI_TalonSRX {
 
     @Override
     public void set(ControlMode mode, double value) {
+
+        //change if only the value or mode is different from last time
         if (value != mLastSet || mode != mLastControlMode) {
             mLastSet = value;
             mLastControlMode = mode;

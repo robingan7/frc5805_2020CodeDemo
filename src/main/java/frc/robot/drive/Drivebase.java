@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import frc.robot.cycle.*;
 import frc.lib.motor.Maker;
 import frc.robot.Constants;
-import frc.robot.Subsystem_Function;
+import frc.robot.subsystem.Subsystem_Function;
 
 public class Drivebase extends Subsystem_Function{
     private final WPI_TalonSRX mLeftMaster, mRightMaster;
@@ -79,7 +79,7 @@ public class Drivebase extends Subsystem_Function{
     public Drivebase(){
         mFeedData=new FeedData();
          // Start all Talons in open loop mode.
-         mLeftMaster = Maker.createTalon(10);
+         mLeftMaster = Maker.createTalon( Constants.kLeftDriveMasterId);
          configureMaster(mLeftMaster, true);
  
          mLeftSlaveA = Maker.createVictor(Constants.kLeftDriveSlaveAId,
@@ -92,15 +92,15 @@ public class Drivebase extends Subsystem_Function{
 
  
          mRightMaster = Maker.createTalon(Constants.kRightDriveMasterId);
-         configureMaster(mRightMaster, false);
+         configureMaster(mRightMaster, true);
  
          mRightSlaveA = Maker.createVictor(Constants.kRightDriveSlaveAId,
                  Constants.kRightDriveMasterId);
-         mRightSlaveA.setInverted(true);
+         //mRightSlaveA.setInverted(true);
  
          mRightSlaveB = Maker.createVictor(Constants.kRightDriveSlaveBId,
                  Constants.kRightDriveMasterId);
-         mRightSlaveB.setInverted(true);
+         //mRightSlaveB.setInverted(true);
  
          mPigeonIMU=new PigeonIMU(mLeftMaster);
         //It was a slave motor in 254's code
@@ -196,10 +196,18 @@ public class Drivebase extends Subsystem_Function{
         return mFeedData.gyro_heading;
     }
 
+    /**
+     * I don't know where it will be used
+     */
     public void registerEnabledLoops(ICycle_in regist) {
-        regist.enableSubsystem(mCycle);
+        regist.addSubsystem(mCycle);
     }
 
+    /**
+     * this is the autonomous feeding method
+     * @param signal
+     * @param feedforward
+     */
     public synchronized void setVelocity(DriveSignal signal, DriveSignal feedforward) {
         if (currentDriveState != DriveControlState.PATH_FOLLOWING) {
             // We entered a velocity control state.
@@ -211,7 +219,7 @@ public class Drivebase extends Subsystem_Function{
             mLeftMaster.configNeutralDeadband(0.0, 0);
             mRightMaster.configNeutralDeadband(0.0, 0);*/
 
-            currentDriveState = DriveControlState.PATH_FOLLOWING;
+            currentDriveState = DriveControlState.OPEN_LOOP;// Wrong Code
         }
         mFeedData.left_demand = signal.getLeft();
         mFeedData.right_demand = signal.getRight();
@@ -270,15 +278,20 @@ public class Drivebase extends Subsystem_Function{
         AUTO_SHIFT
     }
 
+    /**
+     * override from iSubsystem
+     * move the drive base depends the state(telep or autonomous)
+     */
     @Override
     public synchronized void move_subsystem(){
+        System.out.println(currentDriveState);
         if (currentDriveState == DriveControlState.OPEN_LOOP) {
             /*
             mLeftMaster.set(ControlMode.PercentOutput, mFeedData.left_demand, DemandType.ArbitraryFeedForward, 0.0);
             mRightMaster.set(ControlMode.PercentOutput, mFeedData.right_demand, DemandType.ArbitraryFeedForward, 0.0);
             */
             telep_drive.arcadeDrive(mFeedData.xspeed, mFeedData.zrotation);
-            System.out.println(mFeedData.xspeed+" "+mFeedData.zrotation);
+            System.out.println(mFeedData.xspeed + " " + mFeedData.zrotation);
         } else {
             mLeftMaster.set(ControlMode.Velocity, mFeedData.left_demand, DemandType.ArbitraryFeedForward,
                     mFeedData.left_feedforward + Constants.kDriveLowGearVelocityKd * mFeedData.left_accel / 1023.0);

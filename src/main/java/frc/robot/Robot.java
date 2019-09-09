@@ -6,9 +6,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.cycle.Cycle_in;
 import frc.robot.drive.Drivebase;
 import frc.robot.drive.SM_Driver;
-import frc.robot.joystick_control.IMainControlBoard;
 import frc.robot.joystick_control.MainControlBoard;
 import frc.lib.utility.DriveSignal;
+import frc.robot.subsystem.*;
 
 import java.util.Arrays;
 
@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
       Arrays.asList(
         Drivebase.getInstance()
       )
-);
+    );
 
 private Drivebase mDrive = Drivebase.getInstance();
   
@@ -57,21 +57,23 @@ private Drivebase mDrive = Drivebase.getInstance();
       mEnabledLooper.start_all();
 
       mDrive.setVelocity(DriveSignal.NEUTRAL, DriveSignal.NEUTRAL);
-      mDrive.setOpenLoop(new DriveSignal(0.05, 0.05));
+      mDrive.setOpenLoop(new DriveSignal(0.05, 0.05));//set a number that is less than the deadband
     }catch(Throwable t){
         throw t;
     }
   }
+
   @Override
   public void teleopPeriodic() {
     double timestamp = Timer.getFPGATimestamp();
-    double speed = mControlBoard.getSpeed();
-    double turn = mControlBoard.getTurn();
-    boolean quickturn=mControlBoard.getQuickTurn();
+    double speed = mControlBoard.getDriverJoystick().getSpeed();
+    double turn = mControlBoard.getDriverJoystick().getTurn();
+    boolean quickturn=mControlBoard.getDriverJoystick().getQuickTurn();
 
-    System.out.println(speed+" "+turn);
+    ///System.out.println(speed+" "+turn);
     try{
-      mDrive.setOpenLoop(mSM_Driver.smDrive(speed, turn, quickturn));
+      mDrive.setOpenLoop(mSM_Driver.smDrive(speed, turn, quickturn));//return a drive signal class to set open loop
+
     }catch(Throwable t){
       throw t;
     }

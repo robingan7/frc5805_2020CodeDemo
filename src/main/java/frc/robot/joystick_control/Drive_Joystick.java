@@ -1,8 +1,9 @@
 package frc.robot.joystick_control;
 import frc.robot.Constants;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Joystick;//WPILIB_USED_HERE
+
 public class Drive_Joystick implements IDrive_Joystick{
-    private static Drive_Joystick mInstance=new Drive_Joystick();
+    private static Drive_Joystick mInstance = new Drive_Joystick();
 
     public static Drive_Joystick getInstance(){
         return mInstance;
@@ -11,7 +12,7 @@ public class Drive_Joystick implements IDrive_Joystick{
     private Joystick mDriverJoystick;
 
     private Drive_Joystick(){
-        mDriverJoystick=new Joystick(Constants.driveJoystickid);
+        mDriverJoystick = new Joystick(Constants.driveJoystickid);
     }
 
     @Override

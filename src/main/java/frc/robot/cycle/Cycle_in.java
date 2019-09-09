@@ -12,14 +12,14 @@ import java.util.List;
 
 public class Cycle_in implements ICycle_in{
 
-    private boolean isRunning;
+    private boolean isRunning;//if the cycle_in has started
 
     public final double kPeriod = Constants.kLooperDt;
-    private final Notifier notifier_;
-    private final List<Cycle> cycles;
-    private final Object taskCurrentRun_=new Object();
-    private double timestamp_=0;
-    private double dt_=0;
+    private final Notifier notifier_;//cycles the runnable obj
+    private final List<Cycle> cycles;//subsystems that are in this cycle_in obj
+    private final Object taskCurrentRun_ = new Object();//mock obj in order to run synchronized block 
+    private double timestamp_ = 0;//old time stamp, it is always upadated
+    private double dt_=0;//difference between current time and old time stamp
 
     private final CrashTrackerRunnable runnable_= new CrashTrackerRunnable(){
     
@@ -27,25 +27,26 @@ public class Cycle_in implements ICycle_in{
         public void runCrashTracker() {
             synchronized(runnable_){
                 if(isRunning){
-                    double current_time=Timer.getFPGATimestamp();
-                    for(Cycle cycle:cycles){
+                    double current_time = Timer.getFPGATimestamp();
+                    for(Cycle cycle : cycles){
                         cycle.onLoop(current_time);
                     }
-                    dt_=current_time-timestamp_;
-                    timestamp_=current_time;
+                    dt_ = current_time - timestamp_;
+                    timestamp_ = current_time;
+                    //System.out.println("Debug");
                 }
             }
         }
     };
 
     public Cycle_in(){
-        notifier_=new Notifier(runnable_);
-        isRunning=false;
-        cycles=new ArrayList<>();
+        notifier_ = new Notifier(runnable_);
+        isRunning = false;
+        cycles = new ArrayList<>();
     }
 
     @Override
-    public synchronized void enableSubsystem(Cycle cycle){
+    public synchronized void addSubsystem(Cycle cycle){
         synchronized(cycle){
             cycles.add(cycle);
         }
@@ -53,7 +54,7 @@ public class Cycle_in implements ICycle_in{
 
     public synchronized void start_all() {
         if (!isRunning) {
-            System.out.println("Starting cycles");
+           //System.out.println("Starting cycles");
             synchronized (taskCurrentRun_) {
                 timestamp_ = Timer.getFPGATimestamp();
                 for (Cycle cycle : cycles) {
@@ -67,7 +68,7 @@ public class Cycle_in implements ICycle_in{
 
     public synchronized void stop_all() {
         if (isRunning) {
-            System.out.println("Stopping cycles");
+            //System.out.println("Stopping cycles");
             notifier_.stop();
             synchronized (taskCurrentRun_) {
                 isRunning = false;
