@@ -22,7 +22,7 @@ public class Drivebase extends Subsystem_Function{
     private final WPI_TalonSRX mLeftMaster, mRightMaster;
     private final WPI_VictorSPX mLeftSlaveA, mRightSlaveA, mLeftSlaveB, mRightSlaveB;
 
-    private static Drivebase instance_ = new Drivebase();
+    private static Drivebase instance_;
     private FeedData mFeedData;
     private PigeonIMU mPigeonIMU;
     private DifferentialDrive telep_drive;
@@ -73,6 +73,10 @@ public class Drivebase extends Subsystem_Function{
 
 
     public static Drivebase getInstance(){
+        if (instance_ == null) {
+            instance_ = new Drivebase();
+        }
+
         return instance_;
     }
 

@@ -100,4 +100,56 @@ public class Constants{
         public boolean kRecoverPositionOnReset = false;
     }
 
+    // Superstructure Constants
+    // arm
+    public static final SuperStructureSubsystemConstants kArm = new SuperStructureSubsystemConstants();
+    static {
+        kArm.kName = "Arm";
+
+        kArm.kMasterConstants.id = 1;
+        kArm.kMasterConstants.invert_motor = false;
+        kArm.kMasterConstants.invert_sensor_phase = false;
+        kArm.kSlaveConstants = new TalonSRXConstants[2];
+
+        kArm.kSlaveConstants[0] = new TalonSRXConstants();
+        kArm.kSlaveConstants[1] = new TalonSRXConstants();
+
+        kArm.kSlaveConstants[0].id = 2;
+        kArm.kSlaveConstants[0].invert_motor = false;
+        kArm.kSlaveConstants[1].id = 3;
+        kArm.kSlaveConstants[1].invert_motor = false;
+
+        // Unit == Inches
+        kArm.kHomePosition = 10.25;  // Inches off ground
+        kArm.kTicksPerUnitDistance = 4096.0 / (1.75 * Math.PI);
+        kArm.kKp = 0.5;
+        kArm.kKi = 0;
+        kArm.kKd = 10;
+        kArm.kKf = .248;
+        kArm.kKa = 0.0;
+        kArm.kMaxIntegralAccumulator = 0;
+        kArm.kIZone = 0; // Ticks
+        kArm.kDeadband = 0; // Ticks
+
+        kArm.kPositionKp = 0.5;
+        kArm.kPositionKi = 0;
+        kArm.kPositionKd = 10;
+        kArm.kPositionKf = 0;
+        kArm.kPositionMaxIntegralAccumulator = 0;
+        kArm.kPositionIZone = 0; // Ticks
+        kArm.kPositionDeadband = 0; // Ticks
+
+        kArm.kMaxUnitsLimit = 31.1; // inches
+        kArm.kMinUnitsLimit = 0.0; // inches
+
+        kArm.kCruiseVelocity = 4000; // Ticks / 100ms
+        kArm.kAcceleration = 8000; // Ticks / 100ms / s
+        kArm.kRampRate = 0.005; // s
+        kArm.kContinuousCurrentLimit = 35; // amps
+        kArm.kPeakCurrentLimit = 40; // amps
+        kArm.kPeakCurrentDuration = 10; // milliseconds
+
+    }
+    public static final double kElevatorHeightToFloor = 23.337; // (in) height of arm joint to floor when elevator is at 0 pose
+
 }

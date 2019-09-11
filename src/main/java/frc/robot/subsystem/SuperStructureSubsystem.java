@@ -173,12 +173,12 @@ public abstract class SuperStructureSubsystem extends Subsystem_Function {
         public double feedforward;
     }
 
-    protected enum SuperStructureState {
+    protected enum SuperStructureMode {
         OPEN_LOOP, MOTION_MAGIC, POSITION_PID, MOTION_PROFILING
     }
 
     protected FeedData feedData_ = new FeedData();
-    protected SuperStructureState controlState_ = SuperStructureState.OPEN_LOOP;
+    protected SuperStructureMode controlMode_ = SuperStructureMode.OPEN_LOOP;
     protected final Cycle registCycle_ = new Cycle() {
         @Override
         public void onStart(double timestamp) {
@@ -230,10 +230,10 @@ public abstract class SuperStructureSubsystem extends Subsystem_Function {
 
     @Override
     public synchronized void move_subsystem(){
-        if (controlState_ == SuperStructureState.MOTION_MAGIC) {
+        if (controlMode_ == SuperStructureMode.MOTION_MAGIC) {
             master_.set(ControlMode.MotionMagic, feedData_.demand, DemandType.ArbitraryFeedForward,
                          feedData_.feedforward);
-        } else if (controlState_ == SuperStructureState.POSITION_PID || controlState_ == SuperStructureState.MOTION_PROFILING) {
+        } else if (controlMode_ == SuperStructureMode.POSITION_PID || controlMode_ == SuperStructureMode.MOTION_PROFILING) {
             master_.set(ControlMode.Position, feedData_.demand, DemandType.ArbitraryFeedForward,
                     feedData_.feedforward);
         } else {
@@ -248,8 +248,8 @@ public abstract class SuperStructureSubsystem extends Subsystem_Function {
      */
     public synchronized void setOpenLoop(double percentage) {
         feedData_.demand = percentage;
-        if (controlState_ != SuperStructureState.OPEN_LOOP) {
-            controlState_ = SuperStructureState.OPEN_LOOP;
+        if (controlMode_ != SuperStructureMode.OPEN_LOOP) {
+            controlMode_ = SuperStructureMode.OPEN_LOOP;
         }
     }
 
