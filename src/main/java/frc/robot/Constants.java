@@ -11,21 +11,24 @@ public class Constants{
     //--------cycle constant---------
     public static final double kLooperDt = 0.01;
 
-     // Drive
-     public static final int kLeftDriveMasterId = 12;
-     public static final int kLeftDriveSlaveAId = 14;
-     public static final int kLeftDriveSlaveBId = 16;
-     public static final int kRightDriveMasterId = 11;
-     public static final int kRightDriveSlaveAId = 13;
-     public static final int kRightDriveSlaveBId = 15;
- 
-     // Followers
-     public static final int kFollowerLeftAChannelId = 2;
-     public static final int kFollowerLeftBChannelId = 3;
-     public static final int kFollowerRightAChannelId = 0;
-     public static final int kFollowerRightBChannelId = 1;
-     public static final int kFollowerRearAChannelId = 4;
-     public static final int kFollowerRearBChannelId = 5;
+    // Drive
+    public static final int kLeftDriveMasterId = 12;
+    public static final int kLeftDriveSlaveAId = 14;
+    public static final int kLeftDriveSlaveBId = 16;
+    public static final int kRightDriveMasterId = 11;
+    public static final int kRightDriveSlaveAId = 13;
+    public static final int kRightDriveSlaveBId = 15;
+
+    //Wrist
+    public static final int kCanifierWristId = 1;
+    
+    // Followers
+    public static final int kFollowerLeftAChannelId = 2;
+    public static final int kFollowerLeftBChannelId = 3;
+    public static final int kFollowerRightAChannelId = 0;
+    public static final int kFollowerRightBChannelId = 1;
+    public static final int kFollowerRearAChannelId = 4;
+    public static final int kFollowerRearBChannelId = 5;   
 
      // Solenoids
     public static final int kShifterSolenoidId = 4; // PCM 0, Solenoid 4
@@ -60,7 +63,7 @@ public class Constants{
         public boolean invert_sensor_phase = false;
     }
 
-    public static class SuperStructureSubsystemConstants {
+    public static class SuperStructurComponentConstants {
         public String kName = "ERROR_ASSIGN_A_NAME";
 
         public TalonSRXConstants kMasterConstants = new TalonSRXConstants();
@@ -102,7 +105,7 @@ public class Constants{
 
     // Superstructure Constants
     // arm
-    public static final SuperStructureSubsystemConstants kArm = new SuperStructureSubsystemConstants();
+    public static final SuperStructurComponentConstants kArm = new SuperStructurComponentConstants();
     static {
         kArm.kName = "Arm";
 
@@ -152,4 +155,18 @@ public class Constants{
     }
     public static final double kElevatorHeightToFloor = 23.337; // (in) height of arm joint to floor when elevator is at 0 pose
 
+    //arm constant
+    public static final SuperStructurComponentConstants kWrist = new SuperStructurComponentConstants();
+    static {
+        
+    }
+
+    //superstrcuture
+    public static class SuperStructureConstants {
+        public static final double kElevatorPaddingInches = 1;
+        public static final double kWristPaddingDegrees = 5;
+    
+        public static final double[] kPadding = {kElevatorPaddingInches, kWristPaddingDegrees};
+        public static final double[] kPlannerPadding = {kElevatorPaddingInches, kWristPaddingDegrees};
+    }
 }

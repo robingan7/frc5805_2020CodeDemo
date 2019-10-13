@@ -10,7 +10,7 @@ import frc.robot.Constants;
 import frc.lib.motor.MotorUtil;
 import frc.lib.utility.TestIfChanged;
 
-public class Arm extends SuperStructureSubsystem{
+public class Arm extends SuperStructureComponenet{
     private static Arm instance_;
 
     private boolean isBackingToInitialMode_ = false;
@@ -25,7 +25,7 @@ public class Arm extends SuperStructureSubsystem{
         return instance_;
     }
 
-    public Arm(final Constants.SuperStructureSubsystemConstants constant){
+    public Arm(final Constants.SuperStructurComponentConstants constant){
         super(constant);
 
         MotorUtil.checkError(master_.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
@@ -95,6 +95,10 @@ public class Arm extends SuperStructureSubsystem{
     public synchronized void removeCurrentLimits() {
         master_.enableCurrentLimit(false);
     }
-
+    
+    @Override
+    public boolean checkSubsystem(){
+        return true;
+    }
 
 }

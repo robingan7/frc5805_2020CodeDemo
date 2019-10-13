@@ -9,18 +9,18 @@ import frc.robot.Constants;
 import frc.robot.cycle.*;
 import frc.lib.motor.MotorUtil;
 
-public abstract class SuperStructureSubsystem extends Subsystem_Function {
+public abstract class SuperStructureComponenet extends Subsystem_Function {
     private static final int kMotionProfileSlot = 0;
     private static final int kPositionPIDSlot = 1;
 
-    protected final Constants.SuperStructureSubsystemConstants constants_;
+    protected final Constants.SuperStructurComponentConstants constants_;
     protected final WPI_TalonSRX master_;
     protected final WPI_VictorSPX[] slaves_;
 
     protected final int mForwardSoftLimitTicks_;
     protected final int mReverseSoftLimitTicks_;
 
-    protected SuperStructureSubsystem(final Constants.SuperStructureSubsystemConstants constants){
+    protected SuperStructureComponenet(final Constants.SuperStructurComponentConstants constants){
         constants_ = constants;
         master_ = MotorUtil.createTalon(constants_.kMasterConstants.id);
         slaves_ = new WPI_VictorSPX[constants_.kSlaveConstants.length];

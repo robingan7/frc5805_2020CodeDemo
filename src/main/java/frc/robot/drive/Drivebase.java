@@ -2,7 +2,6 @@ package frc.robot.drive;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.motorcontrol.*;
-import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.sensors.PigeonIMU;
 
 import frc.lib.waypoint.*;
@@ -288,14 +287,14 @@ public class Drivebase extends Subsystem_Function{
      */
     @Override
     public synchronized void move_subsystem(){
-        System.out.println(currentDriveState);
+        //System.out.println(currentDriveState);
         if (currentDriveState == DriveControlState.OPEN_LOOP) {
             /*
             mLeftMaster.set(ControlMode.PercentOutput, mFeedData.left_demand, DemandType.ArbitraryFeedForward, 0.0);
             mRightMaster.set(ControlMode.PercentOutput, mFeedData.right_demand, DemandType.ArbitraryFeedForward, 0.0);
             */
             telep_drive.arcadeDrive(mFeedData.xspeed, mFeedData.zrotation);
-            System.out.println(mFeedData.xspeed + " " + mFeedData.zrotation);
+            //System.out.println(mFeedData.xspeed + " " + mFeedData.zrotation);
         } else {
             mLeftMaster.set(ControlMode.Velocity, mFeedData.left_demand, DemandType.ArbitraryFeedForward,
                     mFeedData.left_feedforward + Constants.kDriveLowGearVelocityKd * mFeedData.left_accel / 1023.0);
@@ -335,5 +334,10 @@ public class Drivebase extends Subsystem_Function{
             }*/
     
             // System.out.println("control state: " + mDriveControlState + ", left: " + mFeedData.left_demand + ", right: " + mFeedData.right_demand);
+    }
+
+    @Override
+    public boolean checkSubsystem() {
+        return true;
     }
 }

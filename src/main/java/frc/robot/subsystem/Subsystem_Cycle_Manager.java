@@ -11,11 +11,11 @@ import java.util.ArrayList;
  */
 public class Subsystem_Cycle_Manager implements ICycle_in{
    
-    private final List<Subsystem_Function> mAllSubsystems;
+    private final List<Subsystem_Function> allSubsystems_;
     private List<Cycle> mCycle = new ArrayList<>();
 
     public Subsystem_Cycle_Manager(List<Subsystem_Function> allSubsystems) {
-        mAllSubsystems = allSubsystems;
+        allSubsystems_ = allSubsystems;
     }
 
     //---------EnabledLoop-----------
@@ -31,13 +31,13 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
         @Override
         public void onLoop(double timestamp) {
-            for (Subsystem_Function s : mAllSubsystems) {
+            for (Subsystem_Function s : allSubsystems_) {
                 s.update_subsystem();
             }
             for (Cycle l : mCycle) {
                 l.onLoop(timestamp);
             }
-            for (Subsystem_Function s : mAllSubsystems) {
+            for (Subsystem_Function s : allSubsystems_) {
                 s.move_subsystem();
             }
         }
@@ -61,10 +61,10 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
         @Override
         public void onLoop(double timestamp) {
-            for (Subsystem_Function s : mAllSubsystems) {
+            for (Subsystem_Function s : allSubsystems_) {
                 s.update_subsystem();
             }
-            for (Subsystem_Function s : mAllSubsystems) {
+            for (Subsystem_Function s : allSubsystems_) {
                 s.move_subsystem();
             }
         }
@@ -76,7 +76,7 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
     }
 
     public void registerEnabledLoops(Cycle_in enabledLooper) {
-        mAllSubsystems.forEach((s) -> s.registerEnabledLoops(this));
+        allSubsystems_.forEach((s) -> s.registerEnabledLoops(this));
         enabledLooper.addSubsystem(new EnabledLoop());
     }
 
@@ -88,5 +88,16 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
     public void addSubsystem(Cycle loop) {
         mCycle.add(loop);
     }
+
+    public boolean checkSubsystems() {
+        boolean ret_val = true;
+
+        for (Subsystem_Function s : allSubsystems_) {
+            ret_val &= s.checkSubsystem();
+        }
+
+        return ret_val;
+    }
+
 
 }

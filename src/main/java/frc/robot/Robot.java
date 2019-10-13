@@ -9,8 +9,12 @@ import frc.robot.drive.SM_Driver;
 import frc.robot.joystick_control.MainControlBoard;
 import frc.lib.utility.DriveSignal;
 import frc.robot.subsystem.*;
+import frc.robot.auton.AutoActivator;
+import frc.robot.auton.AutoChooser;
+import frc.robot.auton.autoOptions.AutoOptionBase;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public class Robot extends TimedRobot {
   private Cycle_in enabledLooper_ = new Cycle_in();
@@ -22,12 +26,18 @@ public class Robot extends TimedRobot {
   private final Subsystem_Cycle_Manager subsystem_Cycle_Manager_ = new Subsystem_Cycle_Manager(
     Arrays.asList(
       Drivebase.getInstance(),
-      Arm.getInstance()
+      Arm.getInstance(),
+      Wrist.getInstance()
     )
   );
 
-  private Drivebase drivebase_ = Drivebase.getInstance();
+  private final Drivebase drivebase_ = Drivebase.getInstance();
   private final Arm arm_ = Arm.getInstance();
+  private final Wrist wrist_ = Wrist.getInstance();
+
+  private AutoChooser autoModeChooser_ = new AutoChooser();
+  private AutoActivator autoModeActivator_;
+  private boolean mDriveByCameraInAuto = false;
   
   @Override
   public void robotInit() {
@@ -36,8 +46,7 @@ public class Robot extends TimedRobot {
       subsystem_Cycle_Manager_.registerEnabledLoops(enabledLooper_);
       subsystem_Cycle_Manager_.registerDisabledLoops(disabledLooper_);
 
-
-
+      autoModeChooser_.updateModeCreator();
     }catch(Throwable t){
       throw t;
     }
@@ -85,10 +94,59 @@ public class Robot extends TimedRobot {
     double turn = mControlBoard.getDriverJoystick().getTurn();
     boolean quickturn=mControlBoard.getDriverJoystick().getQuickTurn();
 
-    drivebase_.setOpenLoop(sm_driver_.smDrive(speed, turn, quickturn));//return a drive signal class to set open loop
+    drivebase_.setOpenLoop(sm_driver_.smDrive(speed, turn, false));//return a drive signal class to set open loop
   }
 
   @Override
+  public void testInit() {
+    try {
+      System.out.println("Starting check systems.");
+
+      disabledLooper_.stop_all();
+      enabledLooper_.stop_all();
+
+      if (subsystem_Cycle_Manager_.checkSubsystems()) {
+          System.out.println("ALL SYSTEMS PASSED");
+      } else {
+          System.out.println("CHECK ABOVE OUTPUT SOME SYSTEMS FAILED!!!");
+      }
+    } catch (Throwable t) {
+        throw t;
+    }
+
+
+  }
+  @Override
   public void testPeriodic() {
+  }
+
+  @Override
+  public void disabledInit() {
+    try{
+      disabledLooper_.stop_all();
+
+      if (autoModeActivator_ != null) {
+          autoModeActivator_.stop();
+      }
+
+      autoModeChooser_.reset();
+      autoModeChooser_.updateModeCreator();
+      autoModeActivator_ = new AutoActivator();
+    }catch (Throwable t) {
+      throw t;
+    }
+  }
+
+  @Override
+  public void disabledPeriodic(){
+    try{
+      // Update auto modes
+      autoModeChooser_.updateModeCreator();
+
+      Optional<AutoOptionBase> autoMode = autoModeChooser_.getAutoMode();
+      mDriveByCameraInAuto = autoModeChooser_.isDriveByCamera();
+    }catch (Throwable t) {
+        throw t;
+    }
   }
 }

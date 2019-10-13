@@ -20,9 +20,9 @@ public abstract class Subsystem_Function{
 
     //update subsystem's states used in feeding profile and PID
     public void update_subsystem() {}
-/*
-    public abstract boolean checkSystem();
 
+    public abstract boolean checkSubsystem();
+    /*
     public abstract void outputTelemetry();*/
 
     public abstract void stop();
