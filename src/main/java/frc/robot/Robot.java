@@ -25,21 +25,23 @@ public class Robot extends TimedRobot {
   private SM_Driver sm_driver_ = new SM_Driver();
   private MainControlBoard mControlBoard = MainControlBoard.getInstance();
 
-  private final Subsystem_Cycle_Manager subsystem_Cycle_Manager_ = new Subsystem_Cycle_Manager(
-    Arrays.asList(
-      Drivebase.getInstance(),
-      Arm.getInstance(),
-      Wrist.getInstance()
-    )
-  );
-
   private final Drivebase drivebase_ = Drivebase.getInstance();
   private final Arm arm_ = Arm.getInstance();
   private final Wrist wrist_ = Wrist.getInstance();
+  private final Infrastructure infrastructure_ = Infrastructure.getInstance();
+
+  private final Subsystem_Cycle_Manager subsystem_Cycle_Manager_ = new Subsystem_Cycle_Manager(
+    Arrays.asList(
+      drivebase_,
+      arm_,
+      wrist_,
+      infrastructure_
+    )
+  );
 
   private AutoChooser autoModeChooser_ = new AutoChooser();
   private AutoActivator autoModeActivator_;
-  private boolean mDriveByCameraInAuto = false;
+  private boolean driveByCameraInAuto_ = false;
   
   @Override
   public void robotInit() {
@@ -55,7 +57,6 @@ public class Robot extends TimedRobot {
     }catch(Throwable t){
       throw t;
     }
-    
   }
 
   @Override
@@ -64,6 +65,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    try{
+      infrastructure_.setIsManualControl(true); 
+    }catch(Throwable t){
+      throw t;
+    }
    
   }
   @Override
@@ -76,6 +82,7 @@ public class Robot extends TimedRobot {
     try{
       disabledLooper_.stop_all();
       enabledLooper_.start_all();
+      infrastructure_.setIsManualControl(true); 
 
       drivebase_.setVelocity(DriveSignal.NEUTRAL, DriveSignal.NEUTRAL);
       drivebase_.setOpenLoop(new DriveSignal(0.05, 0.05));//set a number that is less than the deadband
@@ -164,6 +171,8 @@ public class Robot extends TimedRobot {
       autoModeChooser_.reset();
       autoModeChooser_.updateModeCreator();
       autoModeActivator_ = new AutoActivator();
+
+      infrastructure_.setIsManualControl(false);
     }catch (Throwable t) {
       throw t;
     }
@@ -176,7 +185,7 @@ public class Robot extends TimedRobot {
       autoModeChooser_.updateModeCreator();
 
       Optional<AutoOptionBase> autoMode = autoModeChooser_.getAutoMode();
-      mDriveByCameraInAuto = autoModeChooser_.isDriveByCamera();
+      driveByCameraInAuto_ = autoModeChooser_.isDriveByCamera();
     }catch (Throwable t) {
         throw t;
     }

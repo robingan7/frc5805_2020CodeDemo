@@ -41,6 +41,8 @@ public class Constants{
     public static final int kCanifierWristId = 1;
     public static final int kGrabberF = 0;
     public static final int kGrabberR = 7; 
+
+    //compressor
     
     // Followers
     public static final int kFollowerLeftAChannelId = 2;
