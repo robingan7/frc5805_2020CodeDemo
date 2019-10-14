@@ -147,16 +147,10 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     }
 
     protected FeedData feedData_ = new FeedData();
-    protected SuperStructureMode controlMode_ = SuperStructureMode.OPEN_LOOP;
-    protected final Cycle registCycle_ = new Cycle() {
+    protected SuperStructureMode controlMode_ = SuperStructureMode.MOTION_MAGIC;//was open loop
+    protected final Cycle registerCycle_ = new Cycle() {
         @Override
-        public void onStart(double timestamp) {
-            // if (mCSVWriter == null) {
-            //     mCSVWriter = new ReflectingCSVWriter<>("/home/lvuser/"
-            //             + constants_.kName.replaceAll("[^A-Za-z0-9]+", "").toUpperCase() + "-LOGS.csv",
-            //             PeriodicIO.class);
-            // }
-        }
+        public void onStart(double timestamp) {}
 
         @Override
         public void onLoop(double timestamp) {
@@ -237,7 +231,7 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
 
     @Override
     public void registerEnabledLoops(ICycle_in enabledLooper) {
-        enabledLooper.addSubsystem(registCycle_);
+        enabledLooper.addSubsystem(registerCycle_);
     }
 
     public synchronized double getPosition() {

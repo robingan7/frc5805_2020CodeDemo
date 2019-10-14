@@ -19,11 +19,12 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     private SuperStructureGoal currentSetPoint_ = null;
     private SuperStructureGoal goal_;
     private SuperStructureGoal preWristLevelGoal_;
+    private SuperStructureGoal lastValidGoal_;
 
     private boolean disableArmAndWrist_ = false;
 
     public enum ArmControlMode {
-        OPEN_LOOP, PID,PRISMATIC_WRIST
+        OPEN_LOOP, PID, PRISMATIC_WRIST
     }
     private ArmControlMode armControlMode_ = ArmControlMode.OPEN_LOOP;
 
@@ -44,6 +45,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
         public void onLoop(double timestamp){
             synchronized(SuperStructureSubsystemContainer.this){
                 updateCurrentState();
+                updateSetpointFromGoal();
 
                 if (currentSetPoint_ != null) {
                     followSetpoint(); // if at desired state, this should stabilize the superstructure at that state
@@ -64,18 +66,33 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     @Override
     public void stop(){}
     
-    public void updateCurrentState(){
+    private void updateSetpointFromGoal(){
+        if (currentSetPoint_ == null) {
+            currentSetPoint_ = new SuperStructureGoal(currentState_);
+        }
+
+        if (lastValidGoal_ == null) {
+            lastValidGoal_ = new SuperStructureGoal(currentState_);
+        }
+
+        if (currentSetPoint_.isAtDesiredState(currentState_) || !goal_.equals(lastValidGoal_)) {
+            currentSetPoint_ = goal_;
+        }
+        lastValidGoal_.state_.setState(goal_.state_);
+    }
+
+    private void updateCurrentState(){
         currentState_.arm_ = arm_.getAngle();
         currentState_.wrist_ = wrist_.getAngle();
     }
 
     private synchronized void followSetpoint() {
-       
         if (disableArmAndWrist_) {
             arm_.setOpenLoop(0.0);
             wrist_.setOpenLoop(0.0);
         } else {
             arm_.setSetpointMotionMagic(currentSetPoint_.state_.arm_);
+            wrist_.setSetpointMotionMagic(currentSetPoint_.state_.wrist_);
         }
     }
 
@@ -85,7 +102,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     }
 
     public synchronized boolean isAtDesiredState() {
-        return  currentState_ != null && goal_ != null && goal_.isAtDesiredState(currentState_);
+        return currentState_ != null && goal_ != null && goal_.isAtDesiredState(currentState_);
     }
 
     public synchronized void setGoal(SuperStructureGoal goal, ArmControlMode armControlMode) {
@@ -93,10 +110,10 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
             goal_ = new SuperStructureGoal(goal.state_);
         }
 
-        if (armControlMode_ == ArmControlMode.PRISMATIC_WRIST
-                && armControlMode_ != armControlMode) {
+        if (armControlMode_ == ArmControlMode.PRISMATIC_WRIST && armControlMode_ != armControlMode) {
                 preWristLevelGoal_ = new SuperStructureGoal(goal_.state_);
         }
+
         if (armControlMode_ != ArmControlMode.PRISMATIC_WRIST) {
                 preWristLevelGoal_ = null;
         }

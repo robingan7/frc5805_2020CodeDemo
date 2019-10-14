@@ -41,9 +41,9 @@ public class SuperStructureCommand{
 
     public static void goToScoreDiskLow(boolean isBack) {
         if(isBack){
-            selectPositionByGamepiece(onlyArms(ScoreDiskLowBack));
+            selectPositionByGamepieceWithClimb(ScoreDiskLowBack);
         } else{
-            selectPositionByGamepiece(onlyArms(ScoreDiskLowFront));
+            selectPositionByGamepieceWithClimb(ScoreDiskLowFront);
         }
         
         mLowPosition = true;
@@ -51,9 +51,9 @@ public class SuperStructureCommand{
 
     public static void goToScoreDiskMiddle(boolean isBack) {
         if(isBack){
-            selectPositionByGamepiece(onlyArms(ScoreDiskMiddleBack));
+            selectPositionByGamepieceWithClimb(ScoreDiskMiddleBack);
         } else{
-            selectPositionByGamepiece(onlyArms(ScoreDiskMiddleFront));
+            selectPositionByGamepieceWithClimb(ScoreDiskMiddleFront);
         }
         
         mMiddlePosition = true;
@@ -61,21 +61,15 @@ public class SuperStructureCommand{
 
     public static void goToScoreDiskHigh(boolean isBack) {
         if(isBack){
-            selectPositionByGamepiece(onlyArms(ScoreDiskHighBack));
+            selectPositionByGamepieceWithClimb(ScoreDiskHighBack);
         } else{
-            selectPositionByGamepiece(onlyArms(ScoreDiskHighFront));
+            selectPositionByGamepieceWithClimb(ScoreDiskHighFront);
         }
         
         mHighPosition = true;
     }
 
-    private static void selectPositionByGamepiece(
-            SuperStructureState withDisk) {
-        selectPositionByGamepieceWithClimb(withDisk);
-    }
-
-    private static void selectPositionByGamepieceWithClimb(
-            SuperStructureState withDisk) {
+    private static void selectPositionByGamepieceWithClimb(SuperStructureState withDisk) {
 
         sendCommandToSuperstructure(withDisk);
 
@@ -88,12 +82,6 @@ public class SuperStructureCommand{
     private static void sendCommandToSuperstructure(SuperStructureState position) {
         SuperStructureSubsystemContainer ss = SuperStructureSubsystemContainer.getInstance();
         ss.setGoal(new SuperStructureGoal(position));
-    }
-
-    public static SuperStructureState onlyArms(SuperStructureState setpoint) {
-        return new SuperStructureState(
-                setpoint.arm_,
-                setpoint.wrist_);
     }
 
 }
