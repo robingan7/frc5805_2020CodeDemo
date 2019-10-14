@@ -8,27 +8,27 @@ import frc.robot.Constants;
 import frc.lib.motor.MotorUtil;
 
 public class Wrist extends SuperStructureComponenet{
-    private static Wrist instance_ = new Wrist(Constants.kWrist);
+    private static Wrist instance_;
+    private int facefront;
 
     public synchronized static Wrist getInstance(){
+        if (instance_ == null) {
+            instance_ = new Wrist(Constants.kWrist);
+        }
+
         return instance_;
     }
 
-    public Wrist(final Constants.SuperStructurComponentConstants constant ){
-        super(constant);
-
-        MotorUtil.checkError(master_.configRemoteFeedbackFilter(Constants.kCanifierWristId, RemoteSensorSource.CANifier_Quadrature,
-                0, Constants.kLongCANTimeoutMs),
-                "Could not set wrist encoder!!!: ");
-
-        MotorUtil.checkError(master_.configSelectedFeedbackSensor(
-                RemoteFeedbackDevice.RemoteSensor0, 0, Constants.kLongCANTimeoutMs),
-                "Could not detect wrist encoder: ");
+    public Wrist(final Constants.SuperStructurComponentConstants constant){
+        super(constant);   
+        facefront = master_.getSelectedSensorPosition();
     }
 
+    public int getFaceFront(){
+        return facefront;
+    }
     public double getAngle(){
-        double result = 0;
-        return result;
+        return getPosition();
     }
 
     @Override

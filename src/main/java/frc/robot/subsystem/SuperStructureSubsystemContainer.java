@@ -4,7 +4,6 @@ import frc.robot.cycle.Cycle;
 import frc.robot.cycle.ICycle_in;
 import frc.robot.statesAndMachanics.SuperStructureState;
 import frc.robot.statesAndMachanics.SuperStructureGoal;
-import edu.wpi.first.hal.communication.*;
 
 /**
  * this class container all the superstucture(arm, and wrist). 
@@ -13,11 +12,15 @@ import edu.wpi.first.hal.communication.*;
 
 public class SuperStructureSubsystemContainer extends Subsystem_Function{
     private final static SuperStructureSubsystemContainer instance_ = new SuperStructureSubsystemContainer();
-    private final Arm  arm_ = Arm.getInstance();
+    private final Arm arm_ = Arm.getInstance();
+    private final Wrist wrist_ = Wrist.getInstance();
 
     private SuperStructureState currentState_ = new SuperStructureState();
     private SuperStructureGoal currentSetPoint_ = null;
     private SuperStructureGoal goal_;
+    private SuperStructureGoal preWristLevelGoal_;
+
+    private boolean disableArmAndWrist_ = false;
 
     public enum ArmControlMode {
         OPEN_LOOP, PID,PRISMATIC_WRIST
@@ -40,7 +43,11 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
         @Override
         public void onLoop(double timestamp){
             synchronized(SuperStructureSubsystemContainer.this){
-                updateArgoal_();
+                updateCurrentState();
+
+                if (currentSetPoint_ != null) {
+                    followSetpoint(); // if at desired state, this should stabilize the superstructure at that state
+                }
             }
         }
         @Override
@@ -57,7 +64,20 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     @Override
     public void stop(){}
     
-    public void updateArgoal_(){}
+    public void updateCurrentState(){
+        currentState_.arm_ = arm_.getAngle();
+        currentState_.wrist_ = wrist_.getAngle();
+    }
+
+    private synchronized void followSetpoint() {
+       
+        if (disableArmAndWrist_) {
+            arm_.setOpenLoop(0.0);
+            wrist_.setOpenLoop(0.0);
+        } else {
+            arm_.setSetpointMotionMagic(currentSetPoint_.state_.arm_);
+        }
+    }
 
     @Override
     public boolean checkSubsystem(){
@@ -75,18 +95,34 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
 
         if (armControlMode_ == ArmControlMode.PRISMATIC_WRIST
                 && armControlMode_ != armControlMode) {
-          //  mPreWristLevelGoal = new SuperStructureGoal(goal_.state_);
+                preWristLevelGoal_ = new SuperStructureGoal(goal_.state_);
         }
         if (armControlMode_ != ArmControlMode.PRISMATIC_WRIST) {
-           // mPreWristLevelGoal = null;
+                preWristLevelGoal_ = null;
         }
 
         armControlMode_ = armControlMode;
-
         
         if (armControlMode_ != ArmControlMode.PRISMATIC_WRIST) {
             goal_.state_.arm_ = goal.state_.arm_;
         }
         goal_.state_.wrist_ = goal.state_.wrist_;
     }
+
+    public synchronized void setGoal(SuperStructureGoal goal) {
+        setGoal(goal, ArmControlMode.PID);
+    }
+
+    public synchronized SuperStructureGoal getPreWristLevelGoal() {
+        return preWristLevelGoal_;
+    }
+
+    public synchronized void overridePreWristLevelGoal(SuperStructureGoal goal) {
+        preWristLevelGoal_ = goal;
+    }
+
+    public synchronized SuperStructureGoal getGoal() {
+        return goal_;
+    }
+
 } 

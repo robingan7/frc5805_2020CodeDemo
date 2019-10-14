@@ -155,7 +155,7 @@ public class Constants{
     }
     public static final double kElevatorHeightToFloor = 23.337; // (in) height of arm joint to floor when elevator is at 0 pose
 
-    //arm constant
+    //wrist constant
     public static final SuperStructurComponentConstants kWrist = new SuperStructurComponentConstants();
     static {
         
@@ -168,5 +168,19 @@ public class Constants{
     
         public static final double[] kPadding = {kElevatorPaddingInches, kWristPaddingDegrees};
         public static final double[] kPlannerPadding = {kElevatorPaddingInches, kWristPaddingDegrees};
+
+        //Arm position
+        public static final int startmatch_from_level1 = 1407;
+        public static final int vertex_from_lvl1 = 6235;
+        public static final int reverselimit_from_lvl1 = -1205;
+        public static final int forwardlimit_from_lvl1 = 13174;
+
+        public static final int backlvl1_from_lvl1 = 12550;
+        public static final int backlvl2_from_lvl1 = 10146;
+        public static final int backlvl3_from_lvl1 = 7250;
+        public static final int frontlvl3_from_lvl1 = 5518;
+        public static final int frontlvl2_from_lvl1 = 2468;
+
+        public static final int faceback_from_facefront = 8376;
     }
 }

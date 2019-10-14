@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import frc.robot.Constants;
+import static frc.robot.Constants.SuperStructureConstants;
 import frc.lib.motor.MotorUtil;
 import frc.lib.utility.TestIfChanged;
 
@@ -16,6 +17,8 @@ public class Arm extends SuperStructureComponenet{
     private boolean isBackingToInitialMode_ = false;
     private boolean canBackToInitalMode_ = true;
     private TestIfChanged changeTester = new TestIfChanged();
+    private int level1;
+    private int vertex;//the point where wrist 
 
     public synchronized static Arm getInstance() {
         if (instance_ == null) {
@@ -28,12 +31,33 @@ public class Arm extends SuperStructureComponenet{
     public Arm(final Constants.SuperStructurComponentConstants constant){
         super(constant);
 
+        int startMatch = master_.getSelectedSensorPosition();
+        level1 = startMatch + SuperStructureConstants.startmatch_from_level1;
+
+        vertex = level1 + SuperStructureConstants.vertex_from_lvl1;
+        int reverselimit = level1 + SuperStructureConstants.reverselimit_from_lvl1;
+        int forwardlimit = level1 + SuperStructureConstants.forwardlimit_from_lvl1;
+
+        MotorUtil.checkError(master_.configReverseSoftLimitThreshold(reverselimit),
+        "Unable to configReverseSoftLimitThreshold(reverselimit) for arm");
+
+        MotorUtil.checkError(master_.configForwardSoftLimitThreshold(forwardlimit),
+        "Unable to configForwardSoftLimitThreshold(forwardlimit) for arm");
+
         MotorUtil.checkError(master_.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
-                                LimitSwitchNormal.NormallyOpen, Constants.kLongCANTimeoutMs),
-                                "Unable to set reverse limit switch for elevator.");
-        master_.overrideLimitSwitchesEnable(true);                        
+        LimitSwitchNormal.NormallyOpen, Constants.kLongCANTimeoutMs),
+        "Unable to set reverse limit switch for arm.");
+
+        master_.overrideLimitSwitchesEnable(true);
     }
 
+    public int getLevelOne() {
+        return level1;
+    }
+
+    public int getVextex(){
+        return vertex;
+    }
 
     public synchronized void setCanBackToInitalMode(boolean canBack) {
         canBackToInitalMode_ = canBack;
@@ -94,6 +118,10 @@ public class Arm extends SuperStructureComponenet{
 
     public synchronized void removeCurrentLimits() {
         master_.enableCurrentLimit(false);
+    }
+
+    public synchronized double getAngle() {
+        return getPosition();
     }
     
     @Override

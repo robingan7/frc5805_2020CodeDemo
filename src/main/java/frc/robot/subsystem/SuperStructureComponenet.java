@@ -17,8 +17,7 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     protected final WPI_TalonSRX master_;
     protected final WPI_VictorSPX[] slaves_;
 
-    protected final int mForwardSoftLimitTicks_;
-    protected final int mReverseSoftLimitTicks_;
+   
 
     protected SuperStructureComponenet(final Constants.SuperStructurComponentConstants constants){
         constants_ = constants;
@@ -28,21 +27,11 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
 
         master_.configVoltageMeasurementFilter(8);
 
-        MotorUtil.checkError(master_.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
+        MotorUtil.checkError(master_.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0,
                 Constants.kLongCANTimeoutMs), constants_.kName + ": Could not detect encoder: ");
-
-        mForwardSoftLimitTicks_ = (int) ((constants_.kMaxUnitsLimit - constants_.kHomePosition) * constants_.kTicksPerUnitDistance);
-        MotorUtil.checkError(
-                master_.configForwardSoftLimitThreshold(mForwardSoftLimitTicks_, Constants.kLongCANTimeoutMs),
-                constants_.kName + ": Could not set forward soft limit: ");
 
         MotorUtil.checkError(master_.configForwardSoftLimitEnable(true, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not enable forward soft limit: ");
-
-        mReverseSoftLimitTicks_ = (int) ((constants_.kMinUnitsLimit - constants_.kHomePosition) * constants_.kTicksPerUnitDistance);
-        MotorUtil.checkError(
-                master_.configReverseSoftLimitThreshold(mReverseSoftLimitTicks_, Constants.kLongCANTimeoutMs),
-                constants_.kName + ": Could not set reverse soft limit: ");
 
         MotorUtil.checkError(master_.configReverseSoftLimitEnable(true, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not enable reverse soft limit: ");
@@ -243,6 +232,19 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
         
     }
 
+    public synchronized void setSetpointMotionMagic(double units, double feedforward_v) {
+        //feedData_.demand = constrainTicks(homeAwareUnitsToTicks(units));
+        feedData_.feedforward = units;
+        if (controlMode_ != SuperStructureMode.MOTION_MAGIC) {
+            master_.selectProfileSlot(kMotionProfileSlot, 0);
+            controlMode_ = SuperStructureMode.MOTION_MAGIC;
+        }
+    }
+
+    public synchronized void setSetpointMotionMagic(double units) {
+        setSetpointMotionMagic(units, 0.0);
+    }
+
     /**
      * start percentage control
      */
@@ -256,6 +258,10 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     @Override
     public void registerEnabledLoops(ICycle_in enabledLooper) {
         enabledLooper.addSubsystem(registCycle_);
+    }
+
+    public synchronized double getPosition() {
+        return ticksToHomedUnits(feedData_.position_ticks);
     }
 
     //utility function 

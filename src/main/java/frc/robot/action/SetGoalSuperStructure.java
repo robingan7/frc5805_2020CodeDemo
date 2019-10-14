@@ -12,6 +12,7 @@ public class SetGoalSuperStructure extends SuperstructureActionBase{
 
     @Override
     public void start(){
-        //superStructure_.setGoal(new SuperStructureGoal(forwardState_));
+        superStructure_.setGoal(new SuperStructureGoal(forwardState_));
+        
     }
 }
