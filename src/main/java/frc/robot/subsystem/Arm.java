@@ -1,5 +1,7 @@
 package frc.robot.subsystem;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
@@ -89,7 +91,7 @@ public class Arm extends SuperStructureComponenet{
         // special case for backing to intial mode
         if(isBackingToInitialMode_) {
             if(isAtInitialMode()){
-                zeroSensors();
+                resetSensors();
 
                 //Can be used to override-disable the soft limits. This function can be used to quickly disable soft limits without having to modify the persistent configuration.
                 master_.overrideSoftLimitsEnable(true);
@@ -124,8 +126,17 @@ public class Arm extends SuperStructureComponenet{
         return getPosition();
     }
     
+    @Override 
+    public void resetSensors(){
+        setSetpointMotionMagic(level1);
+    }
+
     @Override
     public boolean checkSubsystem(){
+        SmartDashboard.putNumber("Arm Value", master_.getSelectedSensorPosition());
+        SmartDashboard.putNumber("Arm Error",master_.getClosedLoopError());
+        SmartDashboard.putNumber("Arm Current:", master_.getOutputCurrent());
+
         return true;
     }
 

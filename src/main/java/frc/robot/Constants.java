@@ -2,6 +2,20 @@ package frc.robot;
 
 public class Constants{
 
+    //motion profile solot
+    /**
+	 * Which PID slot to pull gains from. Starting 2018, you can choose from
+	 * 0,1,2 or 3. Only the first two (0,1) are visible in web-based
+	 * configuration.
+	 */
+    public static final int kSlotIdx = 0;
+
+	/**
+	 * Talon SRX/ Victor SPX will supported multiple (cascaded) PID loops. For
+	 * now we just want the primary one.
+	 */
+	public static final int kPIDLoopIdx = 0;
+
     // Wheels
     public static final double kDriveWheelTrackWidthInches = 25.54;
     public static final double kDriveWheelDiameterInches = 3.92820959548 * 0.99;
@@ -19,8 +33,14 @@ public class Constants{
     public static final int kRightDriveSlaveAId = 13;
     public static final int kRightDriveSlaveBId = 15;
 
+    public static final int kGearShifter = 4;
+    public static final int kFrontLifter = 3;
+    public static final int kBackLifter = 5;
+
     //Wrist
     public static final int kCanifierWristId = 1;
+    public static final int kGrabberF = 0;
+    public static final int kGrabberR = 7; 
     
     // Followers
     public static final int kFollowerLeftAChannelId = 2;
@@ -30,17 +50,7 @@ public class Constants{
     public static final int kFollowerRearAChannelId = 4;
     public static final int kFollowerRearBChannelId = 5;   
 
-     // Solenoids
-    public static final int kShifterSolenoidId = 4; // PCM 0, Solenoid 4
-    public static final int kIntakeCloseSolenoid = 10;
-    public static final int kIntakeClampSolenoid = 9;
-    public static final int kForkliftDeploySolenoid = 7;  // CURRENTLY 6 ON PRACTICE!!!
-    public static final int kFollowerWheelSolenoid = 11;
-    public static final int kElevatorShifterSolenoidId = 8;
-    public static final int kUnlockHookSolenoid = 4;
-    public static final int kJazzHandsSolenoid = 5;
-    public static final int kKickstandSolenoid = 3;
-
+    
     // PID gains for drive velocity loop (LOW GEAR)
     // Units: setpoint, error, and output are in ticks per second.
     public static final double kDriveLowGearVelocityKp = 0.9;
@@ -51,13 +61,13 @@ public class Constants{
     public static final double kDriveVoltageRampRate = 0.0;
 
     public static final int kCANTimeoutMs = 10; //use for on the fly updates
-    public static final int kLongCANTimeoutMs = 100; //use for constructors
+    public static final int kLongCANTimeoutMs = 10; //use for constructors
 
     //Joystick value
 
     public static final int driveJoystickid=0;
 
-    public static class TalonSRXConstants {
+    public static class VictorSRXConstants {
         public int id = -1;
         public boolean invert_motor = false;
         public boolean invert_sensor_phase = false;
@@ -66,8 +76,8 @@ public class Constants{
     public static class SuperStructurComponentConstants {
         public String kName = "ERROR_ASSIGN_A_NAME";
 
-        public TalonSRXConstants kMasterConstants = new TalonSRXConstants();
-        public TalonSRXConstants[] kSlaveConstants = new TalonSRXConstants[0];
+        public VictorSRXConstants kMasterConstants = new VictorSRXConstants();
+        public VictorSRXConstants[] kSlaveConstants = new VictorSRXConstants[0];
 
         public double kHomePosition = 0.0; // Units
         public double kTicksPerUnitDistance = 1.0;
@@ -101,6 +111,9 @@ public class Constants{
 
         public int kStastusFrame8UpdateRate = 1000;
         public boolean kRecoverPositionOnReset = false;
+
+        public double kNominalOutputForward = 0;
+        public double kNominalOutputReverse = 0;
     }
 
     // Superstructure Constants
@@ -109,56 +122,78 @@ public class Constants{
     static {
         kArm.kName = "Arm";
 
-        kArm.kMasterConstants.id = 1;
+        kArm.kMasterConstants.id = 18;
         kArm.kMasterConstants.invert_motor = false;
         kArm.kMasterConstants.invert_sensor_phase = false;
-        kArm.kSlaveConstants = new TalonSRXConstants[2];
+        kArm.kSlaveConstants = new VictorSRXConstants[1];
 
-        kArm.kSlaveConstants[0] = new TalonSRXConstants();
-        kArm.kSlaveConstants[1] = new TalonSRXConstants();
+        kArm.kSlaveConstants[0] = new VictorSRXConstants();
 
-        kArm.kSlaveConstants[0].id = 2;
+        kArm.kSlaveConstants[0].id = 19;
         kArm.kSlaveConstants[0].invert_motor = false;
-        kArm.kSlaveConstants[1].id = 3;
-        kArm.kSlaveConstants[1].invert_motor = false;
 
-        // Unit == Inches
-        kArm.kHomePosition = 10.25;  // Inches off ground
-        kArm.kTicksPerUnitDistance = 4096.0 / (1.75 * Math.PI);
-        kArm.kKp = 0.5;
-        kArm.kKi = 0;
-        kArm.kKd = 10;
-        kArm.kKf = .248;
+        kArm.kKp = 0.4;
+        kArm.kKi = 0.0001;
+        kArm.kKd = 0;
+        kArm.kKf = 0;
         kArm.kKa = 0.0;
         kArm.kMaxIntegralAccumulator = 0;
         kArm.kIZone = 0; // Ticks
         kArm.kDeadband = 0; // Ticks
 
-        kArm.kPositionKp = 0.5;
-        kArm.kPositionKi = 0;
-        kArm.kPositionKd = 10;
-        kArm.kPositionKf = 0;
         kArm.kPositionMaxIntegralAccumulator = 0;
-        kArm.kPositionIZone = 0; // Ticks
+        kArm.kPositionIZone = 400; // Ticks
         kArm.kPositionDeadband = 0; // Ticks
 
         kArm.kMaxUnitsLimit = 31.1; // inches
         kArm.kMinUnitsLimit = 0.0; // inches
 
-        kArm.kCruiseVelocity = 4000; // Ticks / 100ms
-        kArm.kAcceleration = 8000; // Ticks / 100ms / s
+        kArm.kCruiseVelocity = 3000; // Ticks / 100ms
+        kArm.kAcceleration = 3000; // Ticks / 100ms / s
         kArm.kRampRate = 0.005; // s
-        kArm.kContinuousCurrentLimit = 35; // amps
+        kArm.kContinuousCurrentLimit = 14; // amps
         kArm.kPeakCurrentLimit = 40; // amps
-        kArm.kPeakCurrentDuration = 10; // milliseconds
+        kArm.kPeakCurrentDuration = 14; // milliseconds
 
+        kArm.kNominalOutputForward = 0;
+        kArm.kNominalOutputReverse = 0;
     }
-    public static final double kElevatorHeightToFloor = 23.337; // (in) height of arm joint to floor when elevator is at 0 pose
 
     //wrist constant
     public static final SuperStructurComponentConstants kWrist = new SuperStructurComponentConstants();
     static {
-        
+        kWrist.kName = "Wrist";
+
+        kWrist.kMasterConstants.id = 17;
+        kWrist.kMasterConstants.invert_motor = true;
+        kWrist.kMasterConstants.invert_sensor_phase = true;
+        kWrist.kSlaveConstants = new VictorSRXConstants[0];
+
+        kWrist.kKp = 0.6;
+        kWrist.kKi = 0.0001;
+        kWrist.kKd = 0;
+        kWrist.kKf = 0;
+        kWrist.kKa = 0.0;
+        kWrist.kMaxIntegralAccumulator = 0;
+        kWrist.kIZone = 0; // Ticks
+        kWrist.kDeadband = 0; // Ticks
+
+        kWrist.kPositionMaxIntegralAccumulator = 0;
+        kWrist.kPositionIZone = 400; // Ticks
+        kWrist.kPositionDeadband = 0; // Ticks
+
+        kWrist.kMaxUnitsLimit = 31.1; // inches
+        kWrist.kMinUnitsLimit = 0.0; // inches
+
+        kWrist.kCruiseVelocity = 3000; // Ticks / 100ms
+        kWrist.kAcceleration = 3000; // Ticks / 100ms / s
+        kWrist.kRampRate = 0.005; // s
+        kWrist.kContinuousCurrentLimit = 20; // amps
+        kWrist.kPeakCurrentLimit = 40; // amps
+        kWrist.kPeakCurrentDuration = 20; // milliseconds
+
+        kWrist.kNominalOutputForward = 0.1;
+        kWrist.kNominalOutputReverse = 0.1;
     }
 
     //superstrcuture

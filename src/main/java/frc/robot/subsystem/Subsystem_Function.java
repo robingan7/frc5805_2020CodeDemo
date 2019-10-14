@@ -27,7 +27,7 @@ public abstract class Subsystem_Function{
 
     public abstract void stop();
 
-    public void zeroSensors() {}
+    public void resetSensors() {}
 
     public void registerEnabledLoops(ICycle_in enabledLooper) {}
 }

@@ -15,37 +15,27 @@ public class Operator_Joystick implements IOperator_Joystick{
     }
 
     @Override
-    public boolean isCloseManipulator(){
-        return mOperatorJoystick.getRawButton(1);
+    public boolean isOpenManipulator(){
+        return mOperatorJoystick.getRawButton(7);
     }
 
     @Override
-    public boolean isBackLvl3(){
-        return mOperatorJoystick.getRawButton(1);
-    }
-
-    @Override
-    public boolean isBackLvl2(){
-        return mOperatorJoystick.getRawButton(4);
-    }
-
-    @Override
-    public boolean isBackLvl1(){
-        return mOperatorJoystick.getRawButton(3);
-    }
-
-    @Override
-    public boolean isLvl3(){
+    public boolean isBack(){
         return mOperatorJoystick.getRawButton(5);
     }
 
     @Override
+    public boolean isLvl3(){
+        return mOperatorJoystick.getRawButton(1);
+    }
+
+    @Override
     public boolean isLvl2(){
-        return mOperatorJoystick.getRawButton(6);
+        return mOperatorJoystick.getRawButton(2);
     }
 
     @Override
     public boolean isLvl1(){
-        return mOperatorJoystick.getRawButton(7);
+        return mOperatorJoystick.getRawButton(3);
     }
 }

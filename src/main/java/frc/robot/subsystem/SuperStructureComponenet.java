@@ -10,15 +10,12 @@ import frc.robot.cycle.*;
 import frc.lib.motor.MotorUtil;
 
 public abstract class SuperStructureComponenet extends Subsystem_Function {
-    private static final int kMotionProfileSlot = 0;
-    private static final int kPositionPIDSlot = 1;
+    private static final int kPositionPIDSlot = 0;
 
     protected final Constants.SuperStructurComponentConstants constants_;
     protected final WPI_TalonSRX master_;
     protected final WPI_VictorSPX[] slaves_;
-
    
-
     protected SuperStructureComponenet(final Constants.SuperStructurComponentConstants constants){
         constants_ = constants;
         master_ = MotorUtil.createTalon(constants_.kMasterConstants.id);
@@ -39,39 +36,24 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
         MotorUtil.checkError(master_.configVoltageCompSaturation(12.0, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not set voltage compensation saturation: ");
 
-        MotorUtil.checkError(master_.config_kP(kMotionProfileSlot, constants_.kKp, Constants.kLongCANTimeoutMs),
+        MotorUtil.checkError(master_.config_kP(Constants.kSlotIdx, constants_.kKp, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": could not set kP: ");
 
-        MotorUtil.checkError(master_.config_kI(kMotionProfileSlot, constants_.kKi, Constants.kLongCANTimeoutMs),
+        MotorUtil.checkError(master_.config_kI(Constants.kSlotIdx, constants_.kKi, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": could not set kI: ");
 
-        MotorUtil.checkError(master_.config_kD(kMotionProfileSlot, constants_.kKd, Constants.kLongCANTimeoutMs),
+        MotorUtil.checkError(master_.config_kD(Constants.kSlotIdx, constants_.kKd, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": could not set kD: ");
 
-        MotorUtil.checkError(master_.config_kF(kMotionProfileSlot, constants_.kKf, Constants.kLongCANTimeoutMs),
+        MotorUtil.checkError(master_.config_kF(Constants.kSlotIdx, constants_.kKf, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not set kF: ");
 
-        MotorUtil.checkError(master_.configMaxIntegralAccumulator(kMotionProfileSlot, constants_.kMaxIntegralAccumulator,
+        MotorUtil.checkError(master_.configMaxIntegralAccumulator(Constants.kSlotIdx, constants_.kMaxIntegralAccumulator,
                 Constants.kLongCANTimeoutMs), constants_.kName + ": Could not set max integral: ");
 
-        MotorUtil.checkError(master_.config_IntegralZone(kMotionProfileSlot, constants_.kIZone, Constants.kLongCANTimeoutMs),
-                constants_.kName + ": Could not set i zone: ");
-
         MotorUtil.checkError(
-                master_.configAllowableClosedloopError(kMotionProfileSlot, constants_.kDeadband, Constants.kLongCANTimeoutMs),
+                master_.configAllowableClosedloopError(Constants.kSlotIdx, constants_.kDeadband, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not set deadband: ");
-
-        MotorUtil.checkError(master_.config_kP(kPositionPIDSlot, constants_.kPositionKp, Constants.kLongCANTimeoutMs),
-                constants_.kName + ": could not set kP: ");
-
-        MotorUtil.checkError(master_.config_kI(kPositionPIDSlot, constants_.kPositionKi, Constants.kLongCANTimeoutMs),
-                constants_.kName + ": could not set kI: ");
-
-        MotorUtil.checkError(master_.config_kD(kPositionPIDSlot, constants_.kPositionKd, Constants.kLongCANTimeoutMs),
-                constants_.kName + ": could not set kD: ");
-
-        MotorUtil.checkError(master_.config_kF(kPositionPIDSlot, constants_.kPositionKf, Constants.kLongCANTimeoutMs),
-                constants_.kName + ": Could not set kF: ");
 
         MotorUtil.checkError(master_.configMaxIntegralAccumulator(kPositionPIDSlot, constants_.kPositionMaxIntegralAccumulator,
                 Constants.kLongCANTimeoutMs), constants_.kName + ": Could not set max integral: ");
@@ -111,6 +93,8 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
 
         master_.configVoltageMeasurementFilter(8);
 
+        master_.configNominalOutputForward(constants_.kNominalOutputForward, Constants.kLongCANTimeoutMs);
+        master_.configNominalOutputReverse(constants_.kNominalOutputReverse, Constants.kLongCANTimeoutMs);
 
         MotorUtil.checkError(
                 master_.configVoltageCompSaturation(constants_.kMaxVoltage, Constants.kLongCANTimeoutMs),
@@ -124,8 +108,8 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
         master_.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, 20);
         master_.setStatusFramePeriod(StatusFrameEnhanced.Status_8_PulseWidth, constants_.kStastusFrame8UpdateRate, 20);
 
-        // Start with kMotionProfileSlot.
-        master_.selectProfileSlot(kMotionProfileSlot, 0);
+        // Start with Constants.kSlotIdx.
+        master_.selectProfileSlot(Constants.kSlotIdx, Constants.kPIDLoopIdx);
 
         for (int i = 0; i < slaves_.length; ++i) {
             slaves_[i] = MotorUtil.createVictor(constants_.kSlaveConstants[i].id,
@@ -135,10 +119,6 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
             slaves_[i].follow(master_);
         }
 
-        // The accel term can re-use the velocity unit conversion because both input and output units are per second.
-        //mMotionProfileConstraints = new MotionProfileConstraints(ticksPer100msToUnitsPerSecond(constants_.kCruiseVelocity), ticksPer100msToUnitsPerSecond(constants_.kAcceleration));
-
-        // Send a neutral command.
         stop();
     }
 
@@ -236,7 +216,7 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
         //feedData_.demand = constrainTicks(homeAwareUnitsToTicks(units));
         feedData_.feedforward = units;
         if (controlMode_ != SuperStructureMode.MOTION_MAGIC) {
-            master_.selectProfileSlot(kMotionProfileSlot, 0);
+            master_.selectProfileSlot(Constants.kSlotIdx, Constants.kPIDLoopIdx);
             controlMode_ = SuperStructureMode.MOTION_MAGIC;
         }
     }

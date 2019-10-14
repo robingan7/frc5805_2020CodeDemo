@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import frc.robot.cycle.Cycle_in;
 import frc.robot.drive.Drivebase;
 import frc.robot.drive.SM_Driver;
@@ -12,6 +13,7 @@ import frc.robot.subsystem.*;
 import frc.robot.auton.AutoActivator;
 import frc.robot.auton.AutoChooser;
 import frc.robot.auton.autoOptions.AutoOptionBase;
+import frc.robot.statesAndMachanics.SuperStructureCommand;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -42,7 +44,10 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     try{
-     
+      arm_.resetSensors();
+      wrist_.resetSensors();
+      drivebase_.resetSensors();
+
       subsystem_Cycle_Manager_.registerEnabledLoops(enabledLooper_);
       subsystem_Cycle_Manager_.registerDisabledLoops(disabledLooper_);
 
@@ -92,7 +97,34 @@ public class Robot extends TimedRobot {
     double timestamp = Timer.getFPGATimestamp();
     double speed = mControlBoard.getDriverJoystick().getSpeed();
     double turn = mControlBoard.getDriverJoystick().getTurn();
-    boolean quickturn=mControlBoard.getDriverJoystick().getQuickTurn();
+    boolean quickturn = mControlBoard.getDriverJoystick().getQuickTurn();
+    boolean isArmBack = mControlBoard.getOperatorJoystick().isBack();
+    boolean isOpenMani =  mControlBoard.getOperatorJoystick().isOpenManipulator();
+    boolean isChangingGear = mControlBoard.getDriverJoystick().getShiftGear();
+    boolean isLiftingFront = mControlBoard.getDriverJoystick().getFrontLeg();
+    boolean isLiftingBack = mControlBoard.getDriverJoystick().getBackLeg();
+
+    if(mControlBoard.getOperatorJoystick().isLvl1()){
+      SuperStructureCommand.goToScoreDiskLow(isArmBack);
+    } else if(mControlBoard.getOperatorJoystick().isLvl2()){
+      SuperStructureCommand.goToScoreDiskMiddle(isArmBack);
+    } else if(mControlBoard.getOperatorJoystick().isLvl3()){
+      SuperStructureCommand.goToScoreDiskHigh(isArmBack);
+    }
+
+    if(isChangingGear){
+      drivebase_.setHighGear();
+    }
+
+    if(isLiftingFront){
+      drivebase_.setFrontLifter();
+    }
+
+    if(isLiftingBack){
+      drivebase_.setBackLifter();
+    }
+
+    wrist_.setGrabber(isOpenMani);
 
     drivebase_.setOpenLoop(sm_driver_.smDrive(speed, turn, false));//return a drive signal class to set open loop
   }

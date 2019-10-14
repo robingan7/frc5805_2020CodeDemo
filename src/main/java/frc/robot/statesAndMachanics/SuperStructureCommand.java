@@ -39,45 +39,33 @@ public class SuperStructureCommand{
         ScoreDiskHighBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl3_from_lvl1, faceback);
     }
 
-    public static void goToScoreDiskLowFront() {
-        selectPositionByGamepiece(
-            onlyArms(ScoreDiskLowFront)
-        );
+    public static void goToScoreDiskLow(boolean isBack) {
+        if(isBack){
+            selectPositionByGamepiece(onlyArms(ScoreDiskLowBack));
+        } else{
+            selectPositionByGamepiece(onlyArms(ScoreDiskLowFront));
+        }
+        
         mLowPosition = true;
     }
 
-    public static void goToScoreDiskMiddleFront() {
-        selectPositionByGamepiece(
-            onlyArms(ScoreDiskMiddleFront)
-        );
+    public static void goToScoreDiskMiddle(boolean isBack) {
+        if(isBack){
+            selectPositionByGamepiece(onlyArms(ScoreDiskMiddleBack));
+        } else{
+            selectPositionByGamepiece(onlyArms(ScoreDiskMiddleFront));
+        }
+        
         mMiddlePosition = true;
     }
 
-    public static void goToScoreDiskHighFront() {
-        selectPositionByGamepiece(
-            onlyArms(ScoreDiskHighFront)
-        );
-        mHighPosition = true;
-    }
-
-    public static void goToScoreDiskLowBack() {
-        selectPositionByGamepiece(
-            onlyArms(ScoreDiskLowBack)
-        );
-        mLowPosition = true;
-    }
-
-    public static void goToScoreDiskMiddleBack() {
-        selectPositionByGamepiece(
-            onlyArms(ScoreDiskMiddleBack)
-        );
-        mMiddlePosition = true;
-    }
-
-    public static void goToScoreDiskHighBack() {
-        selectPositionByGamepiece(
-            onlyArms(ScoreDiskHighBack)
-        );
+    public static void goToScoreDiskHigh(boolean isBack) {
+        if(isBack){
+            selectPositionByGamepiece(onlyArms(ScoreDiskHighBack));
+        } else{
+            selectPositionByGamepiece(onlyArms(ScoreDiskHighFront));
+        }
+        
         mHighPosition = true;
     }
 

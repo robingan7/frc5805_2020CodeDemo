@@ -18,13 +18,16 @@ import frc.robot.Constants;
 import frc.robot.subsystem.Subsystem_Function;
 
 public class Drivebase extends Subsystem_Function{
-    private final WPI_TalonSRX mLeftMaster, mRightMaster;
-    private final WPI_VictorSPX mLeftSlaveA, mRightSlaveA, mLeftSlaveB, mRightSlaveB;
+    private final WPI_TalonSRX leftMaster_, rightMaster_;
+    private final WPI_VictorSPX leftSlaveA_, rightSlaveA_, leftSlaveB_, rightSlaveB_;
 
     private static Drivebase instance_;
-    private FeedData mFeedData;
+    private FeedData feedData_;
     private PigeonIMU mPigeonIMU;
     private DifferentialDrive telep_drive;
+    private final Solenoid gearShifter_;
+    private final Solenoid frontLifter_;
+    private final Solenoid backLifter_;
 
     private static final int kLowGearVelocityControlSlot = 0;
     private static final int kHighGearVelocityControlSlot = 1;
@@ -32,9 +35,8 @@ public class Drivebase extends Subsystem_Function{
     private Rotation2d mGyroOffset = Rotation2d.default_;
 
     private DriveControlState currentDriveState;
-    private boolean mIsBrakeMode,mIsHighGear,mAutoShift;
+    private boolean isBrakeMode_, isHighGear_, isFrontLifted_, isBackLifted_, autoShift_;
 
-    private Solenoid mShifter;
     private final Cycle mCycle = new Cycle() {
         @Override
         public void onStart(double timestamp) {
@@ -57,9 +59,7 @@ public class Drivebase extends Subsystem_Function{
                         System.out.println("Unexpected drive control state: " + currentDriveState);
                         break;
                 }
-                {
-                    setHighGear(false);
-                }
+                gearShifter_.set(false);
             }
         }
 
@@ -80,63 +80,83 @@ public class Drivebase extends Subsystem_Function{
     }
 
     public Drivebase(){
-        mFeedData=new FeedData();
+        feedData_= new FeedData();
          // Start all Talons in open loop mode.
-         mLeftMaster = MotorUtil.createTalon( Constants.kLeftDriveMasterId);
-         configureMaster(mLeftMaster, true);
+         leftMaster_ = MotorUtil.createTalon( Constants.kLeftDriveMasterId);
+         configureMaster(leftMaster_, true);
  
-         mLeftSlaveA = MotorUtil.createVictor(Constants.kLeftDriveSlaveAId,
+         leftSlaveA_ = MotorUtil.createVictor(Constants.kLeftDriveSlaveAId,
                  Constants.kLeftDriveMasterId);
-         mLeftSlaveA.setInverted(false);
+         leftSlaveA_.setInverted(false);
  
-         mLeftSlaveB = MotorUtil.createVictor(Constants.kLeftDriveSlaveBId,
+         leftSlaveB_ = MotorUtil.createVictor(Constants.kLeftDriveSlaveBId,
                  Constants.kLeftDriveMasterId);
-         mLeftSlaveB.setInverted(false);
+         leftSlaveB_.setInverted(false);
 
  
-         mRightMaster = MotorUtil.createTalon(Constants.kRightDriveMasterId);
-         configureMaster(mRightMaster, true);
+         rightMaster_ = MotorUtil.createTalon(Constants.kRightDriveMasterId);
+         configureMaster(rightMaster_, true);
  
-         mRightSlaveA = MotorUtil.createVictor(Constants.kRightDriveSlaveAId,
+         rightSlaveA_ = MotorUtil.createVictor(Constants.kRightDriveSlaveAId,
                  Constants.kRightDriveMasterId);
-         //mRightSlaveA.setInverted(true);
+         //rightSlaveA_.setInverted(true);
  
-         mRightSlaveB = MotorUtil.createVictor(Constants.kRightDriveSlaveBId,
+         rightSlaveB_ = MotorUtil.createVictor(Constants.kRightDriveSlaveBId,
                  Constants.kRightDriveMasterId);
-         //mRightSlaveB.setInverted(true);
+         //rightSlaveB_.setInverted(true);
  
-         mPigeonIMU=new PigeonIMU(mLeftMaster);
+         mPigeonIMU = new PigeonIMU(leftMaster_);
         //It was a slave motor in 254's code
 
-        telep_drive=new DifferentialDrive(new SpeedControllerGroup(mLeftMaster, mLeftSlaveA,mLeftSlaveB), 
-                                        new SpeedControllerGroup(mRightMaster, mRightSlaveA,mRightSlaveB));
+        telep_drive = new DifferentialDrive(new SpeedControllerGroup(leftMaster_, leftSlaveA_,leftSlaveB_), 
+                                        new SpeedControllerGroup(rightMaster_, rightSlaveA_,rightSlaveB_));
 
          
-         mShifter = MotorUtil.makeSolenoidFromId(Constants.kShifterSolenoidId);
+         gearShifter_ = new Solenoid(Constants.kGearShifter);
+         frontLifter_ = new Solenoid(Constants.kFrontLifter);
+         backLifter_ = new Solenoid(Constants.kBackLifter);
 
+         isHighGear_ = false;
+         isBackLifted_ = false;
+         isFrontLifted_ = false;
          setGains();
  
     }
     
+    
     public synchronized void setBrakeMode(boolean on) {
-        if (mIsBrakeMode != on) {
-            mIsBrakeMode = on;
+        if (isBrakeMode_ != on) {
+            isBrakeMode_ = on;
             NeutralMode mode = on ? NeutralMode.Brake : NeutralMode.Coast;
-            mRightMaster.setNeutralMode(mode);
-            mRightSlaveA.setNeutralMode(mode);
-            mRightSlaveB.setNeutralMode(mode);
+            rightMaster_.setNeutralMode(mode);
+            rightSlaveA_.setNeutralMode(mode);
+            rightSlaveB_.setNeutralMode(mode);
 
-            mLeftMaster.setNeutralMode(mode);
-            mLeftSlaveA.setNeutralMode(mode);
-            mLeftSlaveB.setNeutralMode(mode);
+            leftMaster_.setNeutralMode(mode);
+            leftSlaveA_.setNeutralMode(mode);
+            leftSlaveB_.setNeutralMode(mode);
         }
     }
 
-    public synchronized void setHighGear(boolean wantsHighGear) {
-        if (wantsHighGear != mIsHighGear) {
-            mIsHighGear = wantsHighGear;
-            mShifter.set(wantsHighGear);
-        }
+    public synchronized void setHighGear() {
+        boolean old_value = isHighGear_;
+        isHighGear_ = !old_value;
+
+        gearShifter_.set(isHighGear_);
+    }
+
+    public synchronized void setFrontLifter() {
+        boolean old_value = isFrontLifted_;
+        isFrontLifted_ = !old_value;
+        
+        frontLifter_.set(isFrontLifted_);
+    }
+
+    public synchronized void setBackLifter() {
+        boolean old_value = isBackLifted_;
+        isBackLifted_ = !old_value;
+        
+        backLifter_.set(isBackLifted_);
     }
 
     private void configureMaster(WPI_TalonSRX talon, boolean left) {
@@ -155,15 +175,19 @@ public class Drivebase extends Subsystem_Function{
     }
 
     public synchronized void resetEncoders() {
-        mLeftMaster.setSelectedSensorPosition(0, 0, 0);
-        mRightMaster.setSelectedSensorPosition(0, 0, 0);
-        mFeedData = new FeedData();
+        leftMaster_.setSelectedSensorPosition(0, 0, 0);
+        rightMaster_.setSelectedSensorPosition(0, 0, 0);
+        feedData_ = new FeedData();
     }
 
-    public void zeroSensors() {
+    public void resetSensors() {
         setHeading(Rotation2d.default_);
         resetEncoders();
-        mAutoShift = true;
+        autoShift_ = true;
+
+        gearShifter_.set(false);
+        frontLifter_.set(false);
+        backLifter_.set(false);
     }
 
     public synchronized void setHeading(Rotation2d heading) {
@@ -172,31 +196,31 @@ public class Drivebase extends Subsystem_Function{
         //mGyroOffset = heading.rotateFromAnother(Rotation2d.fromAngle(mPigeonIMU.getFusedHeading()).inverse());
         System.out.println("Gyro offset: " + mGyroOffset.getDegreeFromCoord());
 
-        mFeedData.gyro_heading = heading;
+        feedData_.gyro_heading = heading;
     }
 
     public synchronized void setOpenLoop(DriveSignal signal) {
         if (currentDriveState != DriveControlState.OPEN_LOOP) {
             setBrakeMode(false);
-            mAutoShift = true;
+            autoShift_ = true;
             /*
             System.out.println("Switching to open loop");
             System.out.println(signal);
             currentDriveState = DriveControlState.OPEN_LOOP;
-            mLeftMaster.configNeutralDeadband(0.04, 0);
-            mRightMaster.configNeutralDeadband(0.04, 0);*/
+            leftMaster_.configNeutralDeadband(0.04, 0);
+            rightMaster_.configNeutralDeadband(0.04, 0);*/
         }
-        //mFeedData.left_demand = signal.getLeft();
-        //mFeedData.right_demand = signal.getRight();
-        mFeedData.xspeed=signal.getSpeed();
-        mFeedData.zrotation=signal.getRotation();
+        //feedData_.left_demand = signal.getLeft();
+        //feedData_.right_demand = signal.getRight();
+        feedData_.xspeed=signal.getSpeed();
+        feedData_.zrotation=signal.getRotation();
 
-        mFeedData.left_feedforward = 0.0;
-        mFeedData.right_feedforward = 0.0;
+        feedData_.left_feedforward = 0.0;
+        feedData_.right_feedforward = 0.0;
     }
 
     public synchronized Rotation2d getHeading() {
-        return mFeedData.gyro_heading;
+        return feedData_.gyro_heading;
     }
 
     /**
@@ -215,34 +239,34 @@ public class Drivebase extends Subsystem_Function{
         if (currentDriveState != DriveControlState.PATH_FOLLOWING) {
             // We entered a velocity control state.
             setBrakeMode(true);
-            mAutoShift = false;
-            /*
-            mLeftMaster.selectProfileSlot(kLowGearVelocityControlSlot, 0);
-            mRightMaster.selectProfileSlot(kLowGearVelocityControlSlot, 0);
-            mLeftMaster.configNeutralDeadband(0.0, 0);
-            mRightMaster.configNeutralDeadband(0.0, 0);*/
+            autoShift_ = false;
+            
+            leftMaster_.selectProfileSlot(kLowGearVelocityControlSlot, 0);
+            rightMaster_.selectProfileSlot(kLowGearVelocityControlSlot, 0);
+            leftMaster_.configNeutralDeadband(0.0, 0);
+            rightMaster_.configNeutralDeadband(0.0, 0);
 
             currentDriveState = DriveControlState.OPEN_LOOP;// Wrong Code
         }
-        mFeedData.left_demand = signal.getLeft();
-        mFeedData.right_demand = signal.getRight();
-        mFeedData.left_feedforward = feedforward.getLeft();
-        mFeedData.right_feedforward = feedforward.getRight();
+        feedData_.left_demand = signal.getLeft();
+        feedData_.right_demand = signal.getRight();
+        feedData_.left_feedforward = feedforward.getLeft();
+        feedData_.right_feedforward = feedforward.getRight();
     }
 
     public synchronized void setGains() {
         /*
-        mLeftMaster.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
-        mLeftMaster.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
-        mLeftMaster.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
-        mLeftMaster.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
-        mLeftMaster.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
 
-        mRightMaster.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
-        mRightMaster.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
-        mRightMaster.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
-        mRightMaster.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
-        mRightMaster.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
         */
     }
 
@@ -290,50 +314,50 @@ public class Drivebase extends Subsystem_Function{
         //System.out.println(currentDriveState);
         if (currentDriveState == DriveControlState.OPEN_LOOP) {
             /*
-            mLeftMaster.set(ControlMode.PercentOutput, mFeedData.left_demand, DemandType.ArbitraryFeedForward, 0.0);
-            mRightMaster.set(ControlMode.PercentOutput, mFeedData.right_demand, DemandType.ArbitraryFeedForward, 0.0);
+            leftMaster_.set(ControlMode.PercentOutput, feedData_.left_demand, DemandType.ArbitraryFeedForward, 0.0);
+            rightMaster_.set(ControlMode.PercentOutput, feedData_.right_demand, DemandType.ArbitraryFeedForward, 0.0);
             */
-            telep_drive.arcadeDrive(mFeedData.xspeed, mFeedData.zrotation);
-            //System.out.println(mFeedData.xspeed + " " + mFeedData.zrotation);
+            telep_drive.arcadeDrive(feedData_.xspeed, feedData_.zrotation);
+            //System.out.println(feedData_.xspeed + " " + feedData_.zrotation);
         } else {
-            mLeftMaster.set(ControlMode.Velocity, mFeedData.left_demand, DemandType.ArbitraryFeedForward,
-                    mFeedData.left_feedforward + Constants.kDriveLowGearVelocityKd * mFeedData.left_accel / 1023.0);
-            mRightMaster.set(ControlMode.Velocity, mFeedData.right_demand, DemandType.ArbitraryFeedForward,
-                    mFeedData.right_feedforward + Constants.kDriveLowGearVelocityKd * mFeedData.right_accel / 1023.0);
+            leftMaster_.set(ControlMode.Velocity, feedData_.left_demand, DemandType.ArbitraryFeedForward,
+                    feedData_.left_feedforward + Constants.kDriveLowGearVelocityKd * feedData_.left_accel / 1023.0);
+            rightMaster_.set(ControlMode.Velocity, feedData_.right_demand, DemandType.ArbitraryFeedForward,
+                    feedData_.right_feedforward + Constants.kDriveLowGearVelocityKd * feedData_.right_accel / 1023.0);
         }
     }
 
     @Override
     public synchronized void update_subsystem(){
         /*
-            double prevLeftTicks = mFeedData.left_position_ticks;
-            double prevRightTicks = mFeedData.right_position_ticks;
-            mFeedData.left_position_ticks = mLeftMaster.getSelectedSensorPosition(0);
-            mFeedData.right_position_ticks = mRightMaster.getSelectedSensorPosition(0);
-            mFeedData.left_velocity_ticks_per_100ms = mLeftMaster.getSelectedSensorVelocity(0);
-            mFeedData.right_velocity_ticks_per_100ms = mRightMaster.getSelectedSensorVelocity(0);
-            //mFeedData.gyro_heading = Rotation2d.fromAngle(mPigeonIMU.getFusedHeading()).rotateFromAnother(mGyroOffset);
+            double prevLeftTicks = feedData_.left_position_ticks;
+            double prevRightTicks = feedData_.right_position_ticks;
+            feedData_.left_position_ticks = leftMaster_.getSelectedSensorPosition(0);
+            feedData_.right_position_ticks = rightMaster_.getSelectedSensorPosition(0);
+            feedData_.left_velocity_ticks_per_100ms = leftMaster_.getSelectedSensorVelocity(0);
+            feedData_.right_velocity_ticks_per_100ms = rightMaster_.getSelectedSensorVelocity(0);
+            //feedData_.gyro_heading = Rotation2d.fromAngle(mPigeonIMU.getFusedHeading()).rotateFromAnother(mGyroOffset);
     
-            double deltaLeftTicks = ((mFeedData.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
+            double deltaLeftTicks = ((feedData_.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
             if (deltaLeftTicks > 0.0) {
-                mFeedData.left_distance += deltaLeftTicks * Constants.kDriveWheelDiameterInches;
+                feedData_.left_distance += deltaLeftTicks * Constants.kDriveWheelDiameterInches;
             } else {
-                mFeedData.left_distance += deltaLeftTicks * Constants.kDriveWheelDiameterInches;
+                feedData_.left_distance += deltaLeftTicks * Constants.kDriveWheelDiameterInches;
             }
     
-            double deltaRightTicks = ((mFeedData.right_position_ticks - prevRightTicks) / 4096.0) * Math.PI;
+            double deltaRightTicks = ((feedData_.right_position_ticks - prevRightTicks) / 4096.0) * Math.PI;
             if (deltaRightTicks > 0.0) {
-                mFeedData.right_distance += deltaRightTicks * Constants.kDriveWheelDiameterInches;
+                feedData_.right_distance += deltaRightTicks * Constants.kDriveWheelDiameterInches;
             } else {
-                mFeedData.right_distance += deltaRightTicks * Constants.kDriveWheelDiameterInches;
+                feedData_.right_distance += deltaRightTicks * Constants.kDriveWheelDiameterInches;
             }*/
     
             /* // no idea what that is
             if (mCSVWriter != null) {
-                mCSVWriter.add(mFeedData);
+                mCSVWriter.add(feedData_);
             }*/
     
-            // System.out.println("control state: " + mDriveControlState + ", left: " + mFeedData.left_demand + ", right: " + mFeedData.right_demand);
+            // System.out.println("control state: " + mDriveControlState + ", left: " + feedData_.left_demand + ", right: " + feedData_.right_demand);
     }
 
     @Override
