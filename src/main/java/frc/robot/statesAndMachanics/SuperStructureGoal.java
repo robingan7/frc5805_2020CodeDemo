@@ -1,6 +1,6 @@
 package frc.robot.statesAndMachanics;
 
-import frc.robot.Constants;
+import static frc.robot.Constants.SuperStructureConstants;
 
 public class SuperStructureGoal{
     public final SuperStructureState state_;
@@ -25,7 +25,7 @@ public class SuperStructureGoal{
         };
 
         for (int i = 0; i < distances.length; i++) {
-            if (Math.abs(distances[i]) > Constants.SuperStructureConstants.kPadding[i]) {
+            if (Math.abs(distances[i]) > SuperStructureConstants.kPadding[i]) {
                 return false;
             }
         }

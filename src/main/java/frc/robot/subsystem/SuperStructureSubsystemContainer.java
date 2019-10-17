@@ -11,7 +11,7 @@ import frc.robot.statesAndMachanics.SuperStructureGoal;
  */
 
 public class SuperStructureSubsystemContainer extends Subsystem_Function{
-    private final static SuperStructureSubsystemContainer instance_ = new SuperStructureSubsystemContainer();
+    private static SuperStructureSubsystemContainer instance_;
     private final Arm arm_ = Arm.getInstance();
     private final Wrist wrist_ = Wrist.getInstance();
 
@@ -29,6 +29,10 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     private ArmControlMode armControlMode_ = ArmControlMode.OPEN_LOOP;
 
     public static SuperStructureSubsystemContainer getInstance(){
+        if (instance_ == null) {
+            instance_ = new SuperStructureSubsystemContainer();
+        }
+
         return instance_;
     }
     private SuperStructureSubsystemContainer(){}
@@ -46,7 +50,6 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
             synchronized(SuperStructureSubsystemContainer.this){
                 updateCurrentState();
                 updateSetpointFromGoal();
-
                 if (currentSetPoint_ != null) {
                     followSetpoint(); // if at desired state, this should stabilize the superstructure at that state
                 }
@@ -67,18 +70,20 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     public void stop(){}
     
     private void updateSetpointFromGoal(){
-        if (currentSetPoint_ == null) {
-            currentSetPoint_ = new SuperStructureGoal(currentState_);
-        }
+        if (goal_ != null) {
+            if (currentSetPoint_ == null) {
+                currentSetPoint_ = new SuperStructureGoal(currentState_);
+            }
 
-        if (lastValidGoal_ == null) {
-            lastValidGoal_ = new SuperStructureGoal(currentState_);
-        }
+            if (lastValidGoal_ == null) {
+                lastValidGoal_ = new SuperStructureGoal(currentState_);
+            }
 
-        if (currentSetPoint_.isAtDesiredState(currentState_) || !goal_.equals(lastValidGoal_)) {
-            currentSetPoint_ = goal_;
+            if (currentSetPoint_.isAtDesiredState(currentState_) || !goal_.equals(lastValidGoal_)) {
+                currentSetPoint_ = goal_;
+            }
+            lastValidGoal_.state_.setState(goal_.state_);
         }
-        lastValidGoal_.state_.setState(goal_.state_);
     }
 
     private void updateCurrentState(){
@@ -93,6 +98,8 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
         } else {
             arm_.setSetpointMotionMagic(currentSetPoint_.state_.arm_);
             wrist_.setSetpointMotionMagic(currentSetPoint_.state_.wrist_);
+            System.out.println("Goal" + goal_.state_.wrist_ + " / " + goal_.state_.arm_);
+            System.out.println("currentSetPoint_" + currentSetPoint_.state_.wrist_ + " / " + currentSetPoint_.state_.arm_);
         }
     }
 
@@ -102,7 +109,8 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     }
 
     public synchronized boolean isAtDesiredState() {
-        return currentState_ != null && goal_ != null && goal_.isAtDesiredState(currentState_);
+        //return currentState_ != null && goal_ != null && goal_.isAtDesiredState(currentState_);
+        return true;
     }
 
     public synchronized void setGoal(SuperStructureGoal goal, ArmControlMode armControlMode) {

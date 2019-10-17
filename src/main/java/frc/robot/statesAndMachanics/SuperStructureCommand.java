@@ -13,8 +13,8 @@ public class SuperStructureCommand{
     private static boolean mLowPosition = false;
 
     //arm instance for updating value
-    private Arm arm_ = Arm.getInstance();
-    private Wrist wrist_ = Wrist.getInstance();
+    private static Arm arm_ = Arm.getInstance();
+    private static Wrist wrist_ = Wrist.getInstance();
 
     //PID value
     private static SuperStructureState ScoreDiskLowFront;
@@ -25,7 +25,7 @@ public class SuperStructureCommand{
     private static SuperStructureState ScoreDiskMiddleBack;
     private static SuperStructureState ScoreDiskHighBack;
 
-    public SuperStructureCommand(){
+    static{
         int level1 = arm_.getLevelOne();
         int facefront = wrist_.getFaceFront();
         int faceback = facefront + SuperStructureConstants.faceback_from_facefront;
@@ -37,6 +37,10 @@ public class SuperStructureCommand{
         ScoreDiskLowBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl1_from_lvl1, faceback);
         ScoreDiskMiddleBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl2_from_lvl1, faceback);
         ScoreDiskHighBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl3_from_lvl1, faceback);
+    }
+
+    public SuperStructureCommand(){
+        
     }
 
     public static void goToScoreDiskLow(boolean isBack) {

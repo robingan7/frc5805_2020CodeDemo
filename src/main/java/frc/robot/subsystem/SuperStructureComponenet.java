@@ -142,12 +142,12 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
         public double feedforward;
     }
 
-    protected enum SuperStructureMode {
+    protected enum SuperStructureComponentMode {
         OPEN_LOOP, MOTION_MAGIC, POSITION_PID, MOTION_PROFILING
     }
 
     protected FeedData feedData_ = new FeedData();
-    protected SuperStructureMode controlMode_ = SuperStructureMode.MOTION_MAGIC;//was open loop
+    protected SuperStructureComponentMode controlMode_ = SuperStructureComponentMode.MOTION_MAGIC;//was open loop
     protected final Cycle registerCycle_ = new Cycle() {
         @Override
         public void onStart(double timestamp) {}
@@ -193,15 +193,18 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
 
     @Override
     public synchronized void move_subsystem(){
-        if (controlMode_ == SuperStructureMode.MOTION_MAGIC) {
+        //System.out.println(constants_.kName +" " + controlMode_ + ":" + feedData_.feedforward +"\n");
+        //System.out.println(constants_.kName + master_.getSelectedSensorPosition());
+
+        if (controlMode_ == SuperStructureComponentMode.MOTION_MAGIC) {
             master_.set(ControlMode.MotionMagic, feedData_.demand, DemandType.ArbitraryFeedForward,
                          feedData_.feedforward);
-        } else if (controlMode_ == SuperStructureMode.POSITION_PID || controlMode_ == SuperStructureMode.MOTION_PROFILING) {
+        } else if (controlMode_ == SuperStructureComponentMode.POSITION_PID || controlMode_ == SuperStructureComponentMode.MOTION_PROFILING) {
             master_.set(ControlMode.Position, feedData_.demand, DemandType.ArbitraryFeedForward,
                     feedData_.feedforward);
         } else {
             master_.set(ControlMode.PercentOutput, feedData_.demand, DemandType.ArbitraryFeedForward,
-                        feedData_.feedforward);
+                        feedData_.output_percent);
         }
         
     }
@@ -209,9 +212,9 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     public synchronized void setSetpointMotionMagic(double units, double feedforward_v) {
         //feedData_.demand = constrainTicks(homeAwareUnitsToTicks(units));
         feedData_.feedforward = units;
-        if (controlMode_ != SuperStructureMode.MOTION_MAGIC) {
+        if (controlMode_ != SuperStructureComponentMode.MOTION_MAGIC) {
             master_.selectProfileSlot(Constants.kSlotIdx, Constants.kPIDLoopIdx);
-            controlMode_ = SuperStructureMode.MOTION_MAGIC;
+            controlMode_ = SuperStructureComponentMode.MOTION_MAGIC;
         }
     }
 
@@ -224,8 +227,8 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
      */
     public synchronized void setOpenLoop(double percentage) {
         feedData_.demand = percentage;
-        if (controlMode_ != SuperStructureMode.OPEN_LOOP) {
-            controlMode_ = SuperStructureMode.OPEN_LOOP;
+        if (controlMode_ != SuperStructureComponentMode.OPEN_LOOP) {
+            controlMode_ = SuperStructureComponentMode.OPEN_LOOP;
         }
     }
 

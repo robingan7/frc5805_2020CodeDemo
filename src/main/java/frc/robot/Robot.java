@@ -25,20 +25,20 @@ public class Robot extends TimedRobot {
   private SM_Driver sm_driver_ = new SM_Driver();
   private MainControlBoard mControlBoard = MainControlBoard.getInstance();
 
-  private final Drivebase drivebase_ = Drivebase.getInstance();
   private final Arm arm_ = Arm.getInstance();
   private final Wrist wrist_ = Wrist.getInstance();
   private final Infrastructure infrastructure_ = Infrastructure.getInstance();
-
+  private final SuperStructureSubsystemContainer superStructure_ = SuperStructureSubsystemContainer.getInstance();
+  private final Drivebase drivebase_ = Drivebase.getInstance();
   private final Subsystem_Cycle_Manager subsystem_Cycle_Manager_ = new Subsystem_Cycle_Manager(
     Arrays.asList(
-      drivebase_,
       arm_,
       wrist_,
-      infrastructure_
+      superStructure_,
+      infrastructure_,
+      drivebase_
     )
   );
-
   private AutoChooser autoModeChooser_ = new AutoChooser();
   private AutoActivator autoModeActivator_;
   private boolean driveByCameraInAuto_ = false;
@@ -49,6 +49,9 @@ public class Robot extends TimedRobot {
       arm_.resetSensors();
       wrist_.resetSensors();
       drivebase_.resetSensors();
+
+      System.out.println(subsystem_Cycle_Manager_);
+
 
       subsystem_Cycle_Manager_.registerEnabledLoops(enabledLooper_);
       subsystem_Cycle_Manager_.registerDisabledLoops(disabledLooper_);
@@ -105,18 +108,24 @@ public class Robot extends TimedRobot {
     double speed = mControlBoard.getDriverJoystick().getSpeed();
     double turn = mControlBoard.getDriverJoystick().getTurn();
     boolean quickturn = mControlBoard.getDriverJoystick().getQuickTurn();
-    boolean isArmBack = mControlBoard.getOperatorJoystick().isBack();
-    boolean isOpenMani =  mControlBoard.getOperatorJoystick().isOpenManipulator();
     boolean isChangingGear = mControlBoard.getDriverJoystick().getShiftGear();
     boolean isLiftingFront = mControlBoard.getDriverJoystick().getFrontLeg();
     boolean isLiftingBack = mControlBoard.getDriverJoystick().getBackLeg();
 
+    boolean isArmBack = mControlBoard.getOperatorJoystick().isBack();
+    boolean isOpenMani =  mControlBoard.getOperatorJoystick().isOpenManipulator();
+
+    System.out.println();
+
     if(mControlBoard.getOperatorJoystick().isLvl1()){
       SuperStructureCommand.goToScoreDiskLow(isArmBack);
+
     } else if(mControlBoard.getOperatorJoystick().isLvl2()){
       SuperStructureCommand.goToScoreDiskMiddle(isArmBack);
+
     } else if(mControlBoard.getOperatorJoystick().isLvl3()){
       SuperStructureCommand.goToScoreDiskHigh(isArmBack);
+
     }
 
     if(isChangingGear){
@@ -152,15 +161,14 @@ public class Robot extends TimedRobot {
     } catch (Throwable t) {
         throw t;
     }
-
-
   }
+
   @Override
   public void testPeriodic() {
   }
 
   @Override
-  public void disabledInit() {
+  public void disabledInit() { 
     try{
       disabledLooper_.stop_all();
 

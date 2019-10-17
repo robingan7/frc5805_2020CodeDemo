@@ -9,7 +9,7 @@ public class Infrastructure extends Subsystem_Function {
     private SuperStructureSubsystemContainer superStructure_ = SuperStructureSubsystemContainer.getInstance();
     private Compressor compressor_ = new Compressor();
 
-    private boolean mIsManualControl = false;
+    private boolean isManualControl_ = false;
 
     private Infrastructure() {}
 
@@ -32,7 +32,7 @@ public class Infrastructure extends Subsystem_Function {
                 synchronized (Infrastructure.this) {
                     boolean superstructureMoving = !superStructure_.isAtDesiredState();
 
-                    if (superstructureMoving || !mIsManualControl) {
+                    if (superstructureMoving || !isManualControl_) {
                         stopCompressor();
                     } else {
                         startCompressor();
@@ -46,15 +46,15 @@ public class Infrastructure extends Subsystem_Function {
     }
 
     public synchronized void setIsManualControl(boolean isManualControl) {
-        mIsManualControl = isManualControl;
+        isManualControl_ = isManualControl;
 
-        if (mIsManualControl) {
+        if (isManualControl_) {
             startCompressor();
         }
     }
 
     public synchronized boolean isManualControl() {
-        return mIsManualControl;
+        return isManualControl_;
     }
 
     private void startCompressor() {

@@ -67,7 +67,8 @@ public class Constants{
 
     //Joystick value
 
-    public static final int driveJoystickid=0;
+    public static final int driveJoystickid = 0;
+    public static final int operatorJoystickid = 1;
 
     public static class VictorSRXConstants {
         public int id = -1;
@@ -150,8 +151,8 @@ public class Constants{
         kArm.kMaxUnitsLimit = 31.1; // inches
         kArm.kMinUnitsLimit = 0.0; // inches
 
-        kArm.kCruiseVelocity = 3000; // Ticks / 100ms
-        kArm.kAcceleration = 3000; // Ticks / 100ms / s
+        kArm.kCruiseVelocity = 300; //should be 3000
+        kArm.kAcceleration = 300; // should be 3000
         kArm.kRampRate = 0.005; // s
         kArm.kContinuousCurrentLimit = 14; // amps
         kArm.kPeakCurrentLimit = 40; // amps
@@ -187,8 +188,8 @@ public class Constants{
         kWrist.kMaxUnitsLimit = 31.1; // inches
         kWrist.kMinUnitsLimit = 0.0; // inches
 
-        kWrist.kCruiseVelocity = 3000; // Ticks / 100ms
-        kWrist.kAcceleration = 3000; // Ticks / 100ms / s
+        kWrist.kCruiseVelocity = 200; // should be 2000
+        kWrist.kAcceleration = 300; // should be 3000
         kWrist.kRampRate = 0.005; // s
         kWrist.kContinuousCurrentLimit = 20; // amps
         kWrist.kPeakCurrentLimit = 40; // amps

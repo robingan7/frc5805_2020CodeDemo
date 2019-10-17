@@ -32,21 +32,21 @@ public class Drive_Joystick implements IDrive_Joystick{
 
     @Override
     public boolean getShiftGear(){
-        return mDriverJoystick.getRawButton(8);
-    }
-
-    @Override
-    public boolean getClimbAuto(){
-        return mDriverJoystick.getRawButton(5);
-    }
-
-    @Override
-    public boolean getBackLeg(){
         return mDriverJoystick.getRawButton(2);
     }
 
     @Override
+    public boolean getClimbAuto(){
+        return mDriverJoystick.getRawButton(12);
+    }
+
+    @Override
+    public boolean getBackLeg(){
+        return mDriverJoystick.getRawButton(6);
+    }
+
+    @Override
     public boolean getFrontLeg(){
-        return mDriverJoystick.getRawButton(3);
+        return mDriverJoystick.getRawButton(5);
     }
 }

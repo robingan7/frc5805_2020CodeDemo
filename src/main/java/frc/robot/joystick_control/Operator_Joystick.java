@@ -11,7 +11,7 @@ public class Operator_Joystick implements IOperator_Joystick{
     private Joystick mOperatorJoystick;
 
     private Operator_Joystick(){
-        mOperatorJoystick = new Joystick(Constants.driveJoystickid);
+        mOperatorJoystick = new Joystick(Constants.operatorJoystickid);
     }
 
     @Override

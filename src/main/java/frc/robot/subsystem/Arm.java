@@ -77,7 +77,7 @@ public class Arm extends SuperStructureComponenet{
     @Override
     public synchronized void handleMasterReset(boolean reset) {
         if (changeTester.test(reset) && canBackToInitalMode_) {
-            System.out.println("Elevator going into home mode!");
+            System.out.println("Arm going into home mode!");
             isBackingToInitialMode_ = true;
             //LED.getInstance().setElevatorFault();
 
@@ -93,12 +93,11 @@ public class Arm extends SuperStructureComponenet{
             if(isAtInitialMode()){
                 resetSensors();
 
-                //Can be used to override-disable the soft limits. This function can be used to quickly disable soft limits without having to modify the persistent configuration.
                 master_.overrideSoftLimitsEnable(true);
                 isBackingToInitialMode_ = false;
             }
 
-            if(controlMode_ == SuperStructureMode.OPEN_LOOP) {
+            if(controlMode_ == SuperStructureComponentMode.OPEN_LOOP) {
                 master_.set(ControlMode.PercentOutput, feedData_.demand, DemandType.ArbitraryFeedForward,
                 0.0);
             } else {
