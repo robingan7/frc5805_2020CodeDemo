@@ -6,7 +6,6 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import frc.robot.Constants;
 import static frc.robot.Constants.SuperStructureConstants;
@@ -120,22 +119,21 @@ public class Arm extends SuperStructureComponenet{
     public synchronized void removeCurrentLimits() {
         master_.enableCurrentLimit(false);
     }
-
-    public synchronized double getAngle() {
-        return getPosition();
-    }
     
     @Override 
     public void resetSensors(){
         setSetpointMotionMagic(level1);
     }
 
-    @Override
-    public boolean checkSubsystem(){
+    @Override 
+    public void sendDataToSmartDashboard(){
         SmartDashboard.putNumber("Arm Value", master_.getSelectedSensorPosition());
         SmartDashboard.putNumber("Arm Error",master_.getClosedLoopError());
         SmartDashboard.putNumber("Arm Current:", master_.getOutputCurrent());
+    }
 
+    @Override
+    public boolean checkSubsystem(){
         return true;
     }
 

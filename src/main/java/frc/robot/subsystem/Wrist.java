@@ -30,9 +30,6 @@ public class Wrist extends SuperStructureComponenet{
     public int getFaceFront(){
         return facefront;
     }
-    public double getAngle(){
-        return getPosition();
-    }
 
     public void setGrabber(boolean state){
         if(state){
@@ -46,13 +43,15 @@ public class Wrist extends SuperStructureComponenet{
         setSetpointMotionMagic(facefront);
     }
 
-    @Override
-    public boolean checkSubsystem(){
+    @Override 
+    public void sendDataToSmartDashboard(){
         SmartDashboard.putNumber("Wrist Value", master_.getSelectedSensorPosition());
         SmartDashboard.putNumber("Wrist Current:", master_.getOutputCurrent());
         SmartDashboard.putNumber("Wrist Error: ", master_.getClosedLoopError());
         SmartDashboard.putNumber("Wrist start Value", facefront);
-        
+    }
+    @Override
+    public boolean checkSubsystem(){
         return true;
     }
 

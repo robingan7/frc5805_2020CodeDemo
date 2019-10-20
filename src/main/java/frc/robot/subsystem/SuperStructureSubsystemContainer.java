@@ -16,15 +16,15 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     private final Wrist wrist_ = Wrist.getInstance();
 
     private SuperStructureState currentState_ = new SuperStructureState();
-    private SuperStructureGoal currentSetPoint_ = null;
-    private SuperStructureGoal goal_;
-    private SuperStructureGoal preWristLevelGoal_;
+    private SuperStructureGoal goal_ = null;
     private SuperStructureGoal lastValidGoal_;
 
     private boolean disableArmAndWrist_ = false;
 
+    private boolean isMovingToGoal = false;
+
     public enum ArmControlMode {
-        OPEN_LOOP, PID, PRISMATIC_WRIST
+        OPEN_LOOP, PID, MOTIONPROFILE
     }
     private ArmControlMode armControlMode_ = ArmControlMode.OPEN_LOOP;
 
@@ -49,9 +49,9 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
         public void onLoop(double timestamp){
             synchronized(SuperStructureSubsystemContainer.this){
                 updateCurrentState();
-                updateSetpointFromGoal();
-                if (currentSetPoint_ != null) {
-                    followSetpoint(); // if at desired state, this should stabilize the superstructure at that state
+                updateGoal();
+                if (goal_ != null && isMovingToGoal) {
+                    moveToGoal(); // if at desired state, this should stabilize the superstructure at that state
                 }
             }
         }
@@ -69,37 +69,37 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     @Override
     public void stop(){}
     
-    private void updateSetpointFromGoal(){
+    private void updateGoal(){
         if (goal_ != null) {
-            if (currentSetPoint_ == null) {
-                currentSetPoint_ = new SuperStructureGoal(currentState_);
-            }
 
             if (lastValidGoal_ == null) {
-                lastValidGoal_ = new SuperStructureGoal(currentState_);
+                lastValidGoal_ = new SuperStructureGoal(goal_.state_);
             }
 
-            if (currentSetPoint_.isAtDesiredState(currentState_) || !goal_.equals(lastValidGoal_)) {
-                currentSetPoint_ = goal_;
+            if (goal_.isAtDesiredState(currentState_) || !goal_.equals(lastValidGoal_)) {
+                lastValidGoal_.state_.setState(goal_.state_);
+                isMovingToGoal = false;
+                armControlMode_ = ArmControlMode.OPEN_LOOP;
+            } else {
+                isMovingToGoal = true;
+                armControlMode_ = ArmControlMode.PID;
             }
-            lastValidGoal_.state_.setState(goal_.state_);
         }
     }
 
     private void updateCurrentState(){
-        currentState_.arm_ = arm_.getAngle();
-        currentState_.wrist_ = wrist_.getAngle();
+        currentState_.arm_ = arm_.getPosition();
+        currentState_.wrist_ = wrist_.getPosition();
     }
 
-    private synchronized void followSetpoint() {
+    private synchronized void moveToGoal() {
         if (disableArmAndWrist_) {
             arm_.setOpenLoop(0.0);
             wrist_.setOpenLoop(0.0);
         } else {
-            arm_.setSetpointMotionMagic(currentSetPoint_.state_.arm_);
-            wrist_.setSetpointMotionMagic(currentSetPoint_.state_.wrist_);
+            arm_.setSetpointMotionMagic(goal_.state_.arm_);
+            wrist_.setSetpointMotionMagic(goal_.state_.wrist_);
             System.out.println("Goal" + goal_.state_.wrist_ + " / " + goal_.state_.arm_);
-            System.out.println("currentSetPoint_" + currentSetPoint_.state_.wrist_ + " / " + currentSetPoint_.state_.arm_);
         }
     }
 
@@ -109,8 +109,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     }
 
     public synchronized boolean isAtDesiredState() {
-        //return currentState_ != null && goal_ != null && goal_.isAtDesiredState(currentState_);
-        return true;
+        return currentState_ != null && goal_ != null && goal_.isAtDesiredState(currentState_);
     }
 
     public synchronized void setGoal(SuperStructureGoal goal, ArmControlMode armControlMode) {
@@ -118,17 +117,9 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
             goal_ = new SuperStructureGoal(goal.state_);
         }
 
-        if (armControlMode_ == ArmControlMode.PRISMATIC_WRIST && armControlMode_ != armControlMode) {
-                preWristLevelGoal_ = new SuperStructureGoal(goal_.state_);
-        }
-
-        if (armControlMode_ != ArmControlMode.PRISMATIC_WRIST) {
-                preWristLevelGoal_ = null;
-        }
-
         armControlMode_ = armControlMode;
         
-        if (armControlMode_ != ArmControlMode.PRISMATIC_WRIST) {
+        if (armControlMode_ != ArmControlMode.OPEN_LOOP) {
             goal_.state_.arm_ = goal.state_.arm_;
         }
         goal_.state_.wrist_ = goal.state_.wrist_;
@@ -138,13 +129,12 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
         setGoal(goal, ArmControlMode.PID);
     }
 
-    public synchronized SuperStructureGoal getPreWristLevelGoal() {
-        return preWristLevelGoal_;
-    }
-
-    public synchronized void overridePreWristLevelGoal(SuperStructureGoal goal) {
-        preWristLevelGoal_ = goal;
-    }
+    /**
+     * this method is used when our wrist or arm is off positioned by other robot. 
+     */
+    public synchronized void moveToLastGoal() {
+        setGoal(lastValidGoal_);
+    } 
 
     public synchronized SuperStructureGoal getGoal() {
         return goal_;

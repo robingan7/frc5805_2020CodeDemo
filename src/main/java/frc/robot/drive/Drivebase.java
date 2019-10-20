@@ -37,7 +37,7 @@ public class Drivebase extends Subsystem_Function{
     private DriveControlState currentDriveState;
     private boolean isBrakeMode_, isHighGear_, isFrontLifted_, isBackLifted_, autoShift_;
 
-    private final Cycle mCycle = new Cycle() {
+    private final Cycle cycle_ = new Cycle() {
         @Override
         public void onStart(double timestamp) {
             synchronized (Drivebase.this) {
@@ -227,7 +227,7 @@ public class Drivebase extends Subsystem_Function{
      * I don't know where it will be used
      */
     public void registerEnabledLoops(ICycle_in regist) {
-        regist.addSubsystem(mCycle);
+        regist.addSubsystem(cycle_);
     }
 
     /**

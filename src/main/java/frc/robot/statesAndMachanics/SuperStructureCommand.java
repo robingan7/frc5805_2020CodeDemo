@@ -25,6 +25,9 @@ public class SuperStructureCommand{
     private static SuperStructureState ScoreDiskMiddleBack;
     private static SuperStructureState ScoreDiskHighBack;
 
+    private static SuperStructureState Defense;
+
+
     static{
         int level1 = arm_.getLevelOne();
         int facefront = wrist_.getFaceFront();
@@ -37,6 +40,9 @@ public class SuperStructureCommand{
         ScoreDiskLowBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl1_from_lvl1, faceback);
         ScoreDiskMiddleBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl2_from_lvl1, faceback);
         ScoreDiskHighBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl3_from_lvl1, faceback);
+
+        //defense_from_facefront: we don't know yet
+        Defense = new SuperStructureState(level1 + SuperStructureConstants.defense_from_lvl1, facefront + SuperStructureConstants.defense_from_facefront);
     }
 
     public SuperStructureCommand(){

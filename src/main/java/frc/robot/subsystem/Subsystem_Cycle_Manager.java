@@ -11,8 +11,8 @@ import java.util.ArrayList;
  */
 public class Subsystem_Cycle_Manager implements ICycle_in{
    
-    private final List<Subsystem_Function> allSubsystems_;
-    private List<Cycle> mCycle = new ArrayList<>();
+    private final List<Subsystem_Function> allSubsystems_;//includes subsystems themselves
+    private List<Cycle> cycles_ = new ArrayList<>();//includes cycles in subsystems
 
     public Subsystem_Cycle_Manager(List<Subsystem_Function> allSubsystems) {
         allSubsystems_ = allSubsystems;
@@ -24,29 +24,18 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
         @Override
         public void onStart(double timestamp) {
-            for (Cycle l : mCycle) {
-                l.onStart(timestamp);
-            }
+            cycles_.forEach(c -> c.onStart(timestamp));
         }
 
         @Override
         public void onLoop(double timestamp) {
-            for (Subsystem_Function s : allSubsystems_) {
-                s.update_subsystem();
-            }
-            for (Cycle l : mCycle) {
-                l.onLoop(timestamp);
-            }
-            for (Subsystem_Function s : allSubsystems_) {
-                s.move_subsystem();
-            }
+            allSubsystems_.forEach(Subsystem_Function::update_subsystem);
+            cycles_.forEach(c -> c.onLoop(timestamp));
+            allSubsystems_.forEach(Subsystem_Function::move_subsystem);
         }
-
         @Override
         public void onStop(double timestamp) {
-            for (Cycle l : mCycle) {
-                l.onStop(timestamp);
-            }
+            cycles_.forEach(c -> c.onStop(timestamp));
         }
     }
 
@@ -55,24 +44,15 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
     private class DisabledLoop implements Cycle {
 
         @Override
-        public void onStart(double timestamp) {
-            
-        }
+        public void onStart(double timestamp) {}
 
         @Override
         public void onLoop(double timestamp) {
-            for (Subsystem_Function s : allSubsystems_) {
-                s.update_subsystem();
-            }
-            for (Subsystem_Function s : allSubsystems_) {
-                s.move_subsystem();
-            }
+            allSubsystems_.forEach(Subsystem_Function::update_subsystem);
         }
 
         @Override
-        public void onStop(double timestamp) {
-
-        }
+        public void onStop(double timestamp) {}
     }
 
     public void registerEnabledLoops(Cycle_in enabledLooper) {
@@ -86,7 +66,12 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
     @Override
     public void addSubsystem(Cycle loop) {
-        mCycle.add(loop);
+        cycles_.add(loop);
+    }
+
+    @Override
+    public void sendAllDataToSmartDashboard(){
+        allSubsystems_.forEach(Subsystem_Function::sendDataToSmartDashboard);
     }
 
     public boolean checkSubsystems() {

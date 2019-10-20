@@ -130,7 +130,7 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     public static class FeedData{
         // INPUTS
         public double timestamp;
-        public int position_ticks;
+        public int position_absolute;
         public double position_units;
         public double output_percent;
         public double output_voltage;
@@ -238,16 +238,7 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     }
 
     public synchronized double getPosition() {
-        return ticksToHomedUnits(feedData_.position_ticks);
+        return master_.getSelectedSensorPosition();
     }
 
-    //utility function 
-    protected double ticksToUnits(double ticks) {
-        return ticks / constants_.kTicksPerUnitDistance;
-    }
-
-    protected double ticksToHomedUnits(double ticks) {
-        double val = ticksToUnits(ticks);
-        return val + constants_.kHomePosition;
-    }
 }

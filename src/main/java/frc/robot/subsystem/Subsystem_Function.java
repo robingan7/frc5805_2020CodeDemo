@@ -29,5 +29,7 @@ public abstract class Subsystem_Function{
 
     public void resetSensors() {}
 
-    public void registerEnabledLoops(ICycle_in enabledLooper) {}
+    public void registerEnabledLoops(ICycle_in enabledLooper){}
+
+    public void sendDataToSmartDashboard(){}
 }

@@ -201,11 +201,10 @@ public class Constants{
 
     //superstrcuture
     public static class SuperStructureConstants {
-        public static final double kElevatorPaddingInches = 1;
-        public static final double kWristPaddingDegrees = 5;
+        public static final double kArmPaddingAbsolute = 200;
+        public static final double kWristPaddingAbsolute = 100;
     
-        public static final double[] kPadding = {kElevatorPaddingInches, kWristPaddingDegrees};
-        public static final double[] kPlannerPadding = {kElevatorPaddingInches, kWristPaddingDegrees};
+        public static final double[] kPadding = {kArmPaddingAbsolute, kWristPaddingAbsolute};
 
         //Arm position
         public static final int startmatch_from_level1 = 1407;
@@ -218,7 +217,10 @@ public class Constants{
         public static final int backlvl3_from_lvl1 = 7250;
         public static final int frontlvl3_from_lvl1 = 5518;
         public static final int frontlvl2_from_lvl1 = 2468;
+        public static final int defense_from_lvl1 = -1700;
 
+        //Wrist position
         public static final int faceback_from_facefront = 8376;
+        public static final int defense_from_facefront = 0;
     }
 }
