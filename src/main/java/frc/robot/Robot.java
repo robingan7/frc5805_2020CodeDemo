@@ -23,7 +23,7 @@ public class Robot extends TimedRobot {
   private Cycle_in disabledLooper_ = new Cycle_in();
 
   private SM_Driver sm_driver_ = new SM_Driver();
-  private MainControlBoard mControlBoard = MainControlBoard.getInstance();
+  private MainControlBoard controlBoard_ = MainControlBoard.getInstance();
 
   private final Arm arm_ = Arm.getInstance();
   private final Wrist wrist_ = Wrist.getInstance();
@@ -77,7 +77,11 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void autonomousPeriodic() {
-    
+    try{
+      teleopControl(true);
+    }catch(Throwable t){
+      throw t;
+    }
   }
   @Override
   public void teleopInit() {
@@ -105,25 +109,25 @@ public class Robot extends TimedRobot {
 
   public void teleopControl(boolean sandStorm){
     double timestamp = Timer.getFPGATimestamp();
-    double speed = mControlBoard.getDriverJoystick().getSpeed();
-    double turn = mControlBoard.getDriverJoystick().getTurn();
-    boolean quickturn = mControlBoard.getDriverJoystick().getQuickTurn();
-    boolean isChangingGear = mControlBoard.getDriverJoystick().getShiftGear();
-    boolean isLiftingFront = mControlBoard.getDriverJoystick().getFrontLeg();
-    boolean isLiftingBack = mControlBoard.getDriverJoystick().getBackLeg();
+    double speed = controlBoard_.getDriverJoystick().getSpeed();
+    double turn = controlBoard_.getDriverJoystick().getTurn();
+    boolean quickturn = controlBoard_.getDriverJoystick().getQuickTurn();
+    boolean isChangingGear = controlBoard_.getDriverJoystick().getShiftGear();
+    boolean isLiftingFront = controlBoard_.getDriverJoystick().getFrontLeg();
+    boolean isLiftingBack = controlBoard_.getDriverJoystick().getBackLeg();
 
-    boolean isArmBack = mControlBoard.getOperatorJoystick().isBack();
-    boolean isOpenMani =  mControlBoard.getOperatorJoystick().isOpenManipulator();
+    boolean isArmBack = controlBoard_.getOperatorJoystick().isBack();
+    boolean isOpenMani =  controlBoard_.getOperatorJoystick().isOpenManipulator();
 
     System.out.println();
 
-    if(mControlBoard.getOperatorJoystick().isLvl1()){
+    if(controlBoard_.getOperatorJoystick().isLvl1()){
       SuperStructureCommand.goToScoreDiskLow(isArmBack);
 
-    } else if(mControlBoard.getOperatorJoystick().isLvl2()){
+    } else if(controlBoard_.getOperatorJoystick().isLvl2()){
       SuperStructureCommand.goToScoreDiskMiddle(isArmBack);
 
-    } else if(mControlBoard.getOperatorJoystick().isLvl3()){
+    } else if(controlBoard_.getOperatorJoystick().isLvl3()){
       SuperStructureCommand.goToScoreDiskHigh(isArmBack);
 
     }
