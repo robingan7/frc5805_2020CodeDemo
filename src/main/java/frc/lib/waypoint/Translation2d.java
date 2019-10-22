@@ -2,28 +2,28 @@
 package frc.lib.waypoint;
 
 public class Translation2d implements InterpolateSingle<Translation2d>{
-    protected double x_,y_; 
+    protected double x_, y_; 
     public static Translation2d default_= new Translation2d();
 
     public Translation2d(){
-        x_=0;
-        y_=0;
+        x_ = 0;
+        y_ = 0;
     }
 
     public Translation2d(final double x, final double y){
-        x_=x;
-        y_=y;
+        x_ = x;
+        y_ = y;
     }
 
     public Translation2d(final Translation2d other){
-        x_=other.x_;
-        y_=other.y_;
+        x_ = other.x_;
+        y_ = other.y_;
     }
 
 
     public Translation2d(final Translation2d start, final Translation2d end){
-        x_=end.x_-start.x_;
-        y_=end.y_-start.y_;
+        x_ = end.x_ - start.x_;
+        y_ = end.y_ - start.y_;
     }
 
     //------get value methods---------
@@ -31,7 +31,7 @@ public class Translation2d implements InterpolateSingle<Translation2d>{
         return Math.hypot(x_, y_);
     }
     public double getNorm2(){
-        return Math.pow(x_, 2)+Math.pow(y_, 2);
+        return Math.pow(x_, 2) + Math.pow(y_, 2);
     }
     //------moving medthods-----------
     public Translation2d translateby(Translation2d other){
@@ -39,11 +39,11 @@ public class Translation2d implements InterpolateSingle<Translation2d>{
     }
 
     public Translation2d rotateBy(Rotation2d rotate){
-        return new Translation2d(x_*rotate.cos()+y_*rotate.sin(),x_*rotate.sin()+y_*rotate.cos());
+        return new Translation2d(x_ * rotate.cos() + y_ * rotate.sin(), x_ * rotate.sin() + y_ * rotate.cos());
     }
 
     public Translation2d inverse(){
-        return new Translation2d(-x_,-y_);
+        return new Translation2d(-x_, -y_);
     }
 
     @Override

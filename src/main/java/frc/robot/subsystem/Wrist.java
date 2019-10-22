@@ -38,11 +38,7 @@ public class Wrist extends SuperStructureComponenet{
             grabber_.set(Value.kReverse);
         }
     }
-    @Override 
-    public void resetSensors(){
-        setSetpointMotionMagic(facefront);
-    }
-
+    
     @Override 
     public void sendDataToSmartDashboard(){
         SmartDashboard.putNumber("Wrist Value", master_.getSelectedSensorPosition());
@@ -50,6 +46,7 @@ public class Wrist extends SuperStructureComponenet{
         SmartDashboard.putNumber("Wrist Error: ", master_.getClosedLoopError());
         SmartDashboard.putNumber("Wrist start Value", facefront);
     }
+    
     @Override
     public boolean checkSubsystem(){
         return true;

@@ -32,7 +32,7 @@ public class Infrastructure extends Subsystem_Function {
                 synchronized (Infrastructure.this) {
                     boolean superstructureMoving = !superStructure_.isAtDesiredState();
 
-                    if (superstructureMoving || !isManualControl_) {
+                    if (!superstructureMoving || !isManualControl_) {
                         stopCompressor();
                     } else {
                         startCompressor();

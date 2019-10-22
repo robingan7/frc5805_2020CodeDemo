@@ -90,7 +90,6 @@ public class Arm extends SuperStructureComponenet{
         // special case for backing to intial mode
         if(isBackingToInitialMode_) {
             if(isAtInitialMode()){
-                resetSensors();
 
                 master_.overrideSoftLimitsEnable(true);
                 isBackingToInitialMode_ = false;
@@ -120,11 +119,6 @@ public class Arm extends SuperStructureComponenet{
         master_.enableCurrentLimit(false);
     }
     
-    @Override 
-    public void resetSensors(){
-        setSetpointMotionMagic(level1);
-    }
-
     @Override 
     public void sendDataToSmartDashboard(){
         SmartDashboard.putNumber("Arm Value", master_.getSelectedSensorPosition());

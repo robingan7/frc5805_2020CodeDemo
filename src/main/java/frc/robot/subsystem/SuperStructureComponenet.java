@@ -143,7 +143,7 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     }
 
     protected enum SuperStructureComponentMode {
-        OPEN_LOOP, MOTION_MAGIC, POSITION_PID, MOTION_PROFILING
+        OPEN_LOOP, MOTION_MAGIC, MOTION_PROFILE
     }
 
     protected FeedData feedData_ = new FeedData();
@@ -193,20 +193,16 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
 
     @Override
     public synchronized void move_subsystem(){
-        //System.out.println(constants_.kName +" " + controlMode_ + ":" + feedData_.feedforward +"\n");
-        //System.out.println(constants_.kName + master_.getSelectedSensorPosition());
-
+        System.out.println("feed: " + feedData_.feedforward);
         if (controlMode_ == SuperStructureComponentMode.MOTION_MAGIC) {
-            master_.set(ControlMode.MotionMagic, feedData_.demand, DemandType.ArbitraryFeedForward,
-                         feedData_.feedforward);
-        } else if (controlMode_ == SuperStructureComponentMode.POSITION_PID || controlMode_ == SuperStructureComponentMode.MOTION_PROFILING) {
+            master_.set(ControlMode.MotionMagic, feedData_.feedforward);
+        } else if (controlMode_ == SuperStructureComponentMode.MOTION_PROFILE) {
             master_.set(ControlMode.Position, feedData_.demand, DemandType.ArbitraryFeedForward,
                     feedData_.feedforward);
         } else {
             master_.set(ControlMode.PercentOutput, feedData_.demand, DemandType.ArbitraryFeedForward,
                         feedData_.output_percent);
-        }
-        
+        } 
     }
 
     public synchronized void setSetpointMotionMagic(double units, double feedforward_v) {

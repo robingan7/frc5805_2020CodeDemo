@@ -46,12 +46,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     try{
-      arm_.resetSensors();
-      wrist_.resetSensors();
       drivebase_.resetSensors();
-
-      System.out.println(subsystem_Cycle_Manager_);
-
+      SuperStructureCommand.goToScoreDiskLow(false);
 
       subsystem_Cycle_Manager_.registerEnabledLoops(enabledLooper_);
       subsystem_Cycle_Manager_.registerDisabledLoops(disabledLooper_);
@@ -118,8 +114,6 @@ public class Robot extends TimedRobot {
 
     boolean isArmBack = controlBoard_.getOperatorJoystick().isBack();
     boolean isOpenMani =  controlBoard_.getOperatorJoystick().isOpenManipulator();
-
-    System.out.println();
 
     if(controlBoard_.getOperatorJoystick().isLvl1()){
       SuperStructureCommand.goToScoreDiskLow(isArmBack);

@@ -24,7 +24,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     private boolean isMovingToGoal = false;
 
     public enum ArmControlMode {
-        OPEN_LOOP, PID, MOTIONPROFILE
+        OPEN_LOOP, PID, MOTION_PROFILE
     }
     private ArmControlMode armControlMode_ = ArmControlMode.OPEN_LOOP;
 
@@ -50,7 +50,9 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
             synchronized(SuperStructureSubsystemContainer.this){
                 updateCurrentState();
                 updateGoal();
+
                 if (goal_ != null && isMovingToGoal) {
+                    System.out.println("current goal: " + goal_.state_.arm_);
                     moveToGoal(); // if at desired state, this should stabilize the superstructure at that state
                 }
             }
@@ -76,7 +78,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
                 lastValidGoal_ = new SuperStructureGoal(goal_.state_);
             }
 
-            if (goal_.isAtDesiredState(currentState_) || !goal_.equals(lastValidGoal_)) {
+            if (goal_.isAtDesiredState(currentState_) && !goal_.equals(lastValidGoal_)) {
                 lastValidGoal_.state_.setState(goal_.state_);
                 isMovingToGoal = false;
                 armControlMode_ = ArmControlMode.OPEN_LOOP;
@@ -99,7 +101,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
         } else {
             arm_.setSetpointMotionMagic(goal_.state_.arm_);
             wrist_.setSetpointMotionMagic(goal_.state_.wrist_);
-            System.out.println("Goal" + goal_.state_.wrist_ + " / " + goal_.state_.arm_);
+            //System.out.println("Goal" + goal_.state_.wrist_ + " / " + goal_.state_.arm_);
         }
     }
 
@@ -139,5 +141,4 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     public synchronized SuperStructureGoal getGoal() {
         return goal_;
     }
-
 } 

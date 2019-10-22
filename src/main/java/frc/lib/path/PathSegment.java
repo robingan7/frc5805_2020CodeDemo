@@ -1,4 +1,6 @@
-package frc.lib.waypoint;
+package frc.lib.path;
+
+import frc.lib.waypoint.*;
 
 public class PathSegment{
     private Translation2d start;
@@ -7,6 +9,8 @@ public class PathSegment{
     private Translation2d deltaStart;
     private Translation2d deltaEnd;
     private double maxSpeed;
-    private boolean maxspeed;
-    
+    private boolean isLine;
+    //private MotionProfile speedController;
+    private boolean extrapolateLookahead;
+    private String marker;
 }
