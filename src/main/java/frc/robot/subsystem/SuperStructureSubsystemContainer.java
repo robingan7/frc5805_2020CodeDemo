@@ -52,7 +52,6 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
                 updateGoal();
 
                 if (goal_ != null && isMovingToGoal) {
-                    System.out.println("current goal: " + goal_.state_.arm_);
                     moveToGoal(); // if at desired state, this should stabilize the superstructure at that state
                 }
             }
@@ -111,7 +110,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     }
 
     public synchronized boolean isAtDesiredState() {
-        return currentState_ != null && goal_ != null && goal_.isAtDesiredState(currentState_);
+        return goal_ == null || (goal_.isAtDesiredState(currentState_) && !goal_.equals(lastValidGoal_));
     }
 
     public synchronized void setGoal(SuperStructureGoal goal, ArmControlMode armControlMode) {

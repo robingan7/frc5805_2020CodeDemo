@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.cycle.*;
 import frc.lib.motor.MotorUtil;
 import frc.robot.Constants;
@@ -37,6 +37,8 @@ public class Drivebase extends Subsystem_Function{
     private DriveControlState currentDriveState;
     private boolean isBrakeMode_, isHighGear_, isFrontLifted_, isBackLifted_, autoShift_;
 
+    private double lastActiveTime = 0;
+
     private final Cycle cycle_ = new Cycle() {
         @Override
         public void onStart(double timestamp) {
@@ -59,7 +61,7 @@ public class Drivebase extends Subsystem_Function{
                         System.out.println("Unexpected drive control state: " + currentDriveState);
                         break;
                 }
-                gearShifter_.set(false);
+                //gearShifter_.set(false);
             }
         }
 
@@ -145,18 +147,28 @@ public class Drivebase extends Subsystem_Function{
         gearShifter_.set(isHighGear_);
     }
 
+    public boolean isAbleActive(){
+        return Math.abs(lastActiveTime - Timer.getFPGATimestamp()) > 0.9;
+    }
     public synchronized void setFrontLifter() {
-        boolean old_value = isFrontLifted_;
-        isFrontLifted_ = !old_value;
-        
-        frontLifter_.set(isFrontLifted_);
+        if(isAbleActive()){
+            boolean old_value = isFrontLifted_;
+            isFrontLifted_ = !old_value;
+            frontLifter_.set(isFrontLifted_);
+
+            lastActiveTime = Timer.getFPGATimestamp();
+        }
     }
 
     public synchronized void setBackLifter() {
-        boolean old_value = isBackLifted_;
-        isBackLifted_ = !old_value;
-        
-        backLifter_.set(isBackLifted_);
+        if(isAbleActive()){
+            boolean old_value = isBackLifted_;
+            isBackLifted_ = !old_value;
+            
+            backLifter_.set(isBackLifted_);
+
+            lastActiveTime = Timer.getFPGATimestamp();
+        }
     }
 
     private void configureMaster(WPI_TalonSRX talon, boolean left) {

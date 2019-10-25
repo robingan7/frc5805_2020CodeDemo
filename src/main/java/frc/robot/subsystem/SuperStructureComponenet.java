@@ -143,7 +143,7 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
     }
 
     protected enum SuperStructureComponentMode {
-        OPEN_LOOP, MOTION_MAGIC, MOTION_PROFILE
+        OPEN_LOOP, MOTION_MAGIC, MOTION_PROFILE,STOP
     }
 
     protected FeedData feedData_ = new FeedData();
@@ -193,7 +193,6 @@ public abstract class SuperStructureComponenet extends Subsystem_Function {
 
     @Override
     public synchronized void move_subsystem(){
-        System.out.println("feed: " + feedData_.feedforward);
         if (controlMode_ == SuperStructureComponentMode.MOTION_MAGIC) {
             master_.set(ControlMode.MotionMagic, feedData_.feedforward);
         } else if (controlMode_ == SuperStructureComponentMode.MOTION_PROFILE) {
