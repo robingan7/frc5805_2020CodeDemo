@@ -12,7 +12,7 @@ import static frc.robot.Constants.SuperStructureConstants;
 import frc.lib.motor.MotorUtility;
 import frc.lib.utility.TestIfChanged;
 
-public class Arm extends SingleMasterMotorSubsystem{
+public class Arm extends SingleMasterMotorSystem{
     private static Arm instance_;
 
     private boolean isBackingToInitialMode_ = false;

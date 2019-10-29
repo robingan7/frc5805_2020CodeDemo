@@ -9,14 +9,14 @@ import frc.robot.Constants;
 import frc.robot.cycle.*;
 import frc.lib.motor.MotorUtility;
 
-public abstract class SingleMasterMotorSubsystem extends Subsystem_Cycle {
+public abstract class SingleMasterMotorSystem extends Subsystem_Cycle {
     private static final int kPositionPIDSlot = 0;
 
     protected final Constants.SuperStructurComponentConstants constants_;
     protected final WPI_TalonSRX master_;
     protected final WPI_VictorSPX[] slaves_;
    
-    protected SingleMasterMotorSubsystem(final Constants.SuperStructurComponentConstants constants){
+    protected SingleMasterMotorSystem(final Constants.SuperStructurComponentConstants constants){
         constants_ = constants;
         master_ = MotorUtility.createTalon(constants_.kMasterConstants.id);
         slaves_ = new WPI_VictorSPX[constants_.kSlaveConstants.length];
@@ -66,10 +66,10 @@ public abstract class SingleMasterMotorSubsystem extends Subsystem_Cycle {
                 constants_.kName + ": Could not set deadband: ");
 
         MotorUtility.checkError(
-                master_.configMotionCruiseVelocity(constants_.kCruiseVelocity, Constants.kLongCANTimeoutMs + 20),
+                master_.configMotionCruiseVelocity(constants_.kCruiseVelocity, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not set cruise velocity: ");
 
-        MotorUtility.checkError(master_.configMotionAcceleration(constants_.kAcceleration, Constants.kLongCANTimeoutMs + 20),
+        MotorUtility.checkError(master_.configMotionAcceleration(constants_.kAcceleration, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not set acceleration: ");
 
         MotorUtility.checkError(master_.configOpenloopRamp(constants_.kRampRate, Constants.kLongCANTimeoutMs),

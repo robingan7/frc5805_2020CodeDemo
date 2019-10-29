@@ -1,6 +1,5 @@
 package frc.robot.cycle;
 
-import frc.robot.cycle.*;
 import java.util.List;
 import java.util.ArrayList;
 
