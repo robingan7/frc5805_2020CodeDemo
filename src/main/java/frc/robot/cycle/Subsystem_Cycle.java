@@ -1,4 +1,4 @@
-package frc.robot.subsystem;
+package frc.robot.cycle;
 
 import frc.robot.cycle.ICycle_in;
 
@@ -12,7 +12,7 @@ import frc.robot.cycle.ICycle_in;
  * state; the robot code will try to match the two states with actions. Each Subsystem also is responsible for
  * instantializing all member components at the start of the match.
  */
-public abstract class Subsystem_Function{
+public abstract class Subsystem_Cycle{
     public void writeToLog() {}
 
     // used to move susystem

@@ -2,6 +2,7 @@ package frc.robot.subsystem;
 
 import frc.robot.cycle.Cycle;
 import frc.robot.cycle.ICycle_in;
+import frc.robot.cycle.Subsystem_Cycle;
 import frc.robot.statesAndMachanics.SuperStructureState;
 import frc.robot.statesAndMachanics.SuperStructureGoal;
 
@@ -10,8 +11,8 @@ import frc.robot.statesAndMachanics.SuperStructureGoal;
  * It contains primary functions that move the motors
  */
 
-public class SuperStructureSubsystemContainer extends Subsystem_Function{
-    private static SuperStructureSubsystemContainer instance_;
+public class SuperStructure extends Subsystem_Cycle{
+    private static SuperStructure instance_;
     private final Arm arm_ = Arm.getInstance();
     private final Wrist wrist_ = Wrist.getInstance();
 
@@ -28,26 +29,26 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
     }
     private ArmControlMode armControlMode_ = ArmControlMode.OPEN_LOOP;
 
-    public static SuperStructureSubsystemContainer getInstance(){
+    public static SuperStructure getInstance(){
         if (instance_ == null) {
-            instance_ = new SuperStructureSubsystemContainer();
+            instance_ = new SuperStructure();
         }
 
         return instance_;
     }
-    private SuperStructureSubsystemContainer(){}
+    private SuperStructure(){}
     
     private Cycle cycle_ = new Cycle(){
         @Override
         public void onStart(double timestamp){
-            synchronized(SuperStructureSubsystemContainer.this){
+            synchronized(SuperStructure.this){
                 armControlMode_ = ArmControlMode.OPEN_LOOP;
             }
         }
 
         @Override
         public void onLoop(double timestamp){
-            synchronized(SuperStructureSubsystemContainer.this){
+            synchronized(SuperStructure.this){
                 updateCurrentState();
                 updateGoal();
 
@@ -106,7 +107,7 @@ public class SuperStructureSubsystemContainer extends Subsystem_Function{
 
     @Override
     public boolean checkSubsystem(){
-        return false;
+        return true;
     }
 
     public synchronized boolean isAtDesiredState() {

@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 
 
-public class MotorUtil{
+public class MotorUtility{
     private final static int kTimeoutMs = 100;
 
     public static class Configuration {

@@ -2,7 +2,7 @@ package frc.robot.statesAndMachanics;
 
 import frc.robot.subsystem.Wrist;
 import frc.robot.subsystem.Arm;
-import frc.robot.subsystem.SuperStructureSubsystemContainer;
+import frc.robot.subsystem.SuperStructure;
 
 import static frc.robot.Constants.SuperStructureConstants;
 
@@ -27,7 +27,6 @@ public class SuperStructureCommand{
 
     private static SuperStructureState Defense;
 
-
     static{
         int level1 = arm_.getLevelOne();
         int facefront = wrist_.getFaceFront();
@@ -42,18 +41,16 @@ public class SuperStructureCommand{
         ScoreDiskHighBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl3_from_lvl1, faceback);
 
         //defense_from_facefront: we don't know yet
-        Defense = new SuperStructureState(level1 + SuperStructureConstants.defense_from_lvl1, facefront + SuperStructureConstants.defense_from_facefront);
+        Defense = new SuperStructureState(level1 + SuperStructureConstants.defense_from_lvl1, facefront);
     }
 
-    public SuperStructureCommand(){
-        
-    }
+    private SuperStructureCommand(){}
 
     public static void goToScoreDiskLow(boolean isBack) {
         if(isBack){
-            selectPositionByGamepieceWithClimb(ScoreDiskLowBack);
+            selectPosition(ScoreDiskLowBack);
         } else{
-            selectPositionByGamepieceWithClimb(ScoreDiskLowFront);
+            selectPosition(ScoreDiskLowFront);
         }
         
         mLowPosition = true;
@@ -61,9 +58,9 @@ public class SuperStructureCommand{
 
     public static void goToScoreDiskMiddle(boolean isBack) {
         if(isBack){
-            selectPositionByGamepieceWithClimb(ScoreDiskMiddleBack);
+            selectPosition(ScoreDiskMiddleBack);
         } else{
-            selectPositionByGamepieceWithClimb(ScoreDiskMiddleFront);
+            selectPosition(ScoreDiskMiddleFront);
         }
         
         mMiddlePosition = true;
@@ -71,15 +68,15 @@ public class SuperStructureCommand{
 
     public static void goToScoreDiskHigh(boolean isBack) {
         if(isBack){
-            selectPositionByGamepieceWithClimb(ScoreDiskHighBack);
+            selectPosition(ScoreDiskHighBack);
         } else{
-            selectPositionByGamepieceWithClimb(ScoreDiskHighFront);
+            selectPosition(ScoreDiskHighFront);
         }
         
         mHighPosition = true;
     }
 
-    private static void selectPositionByGamepieceWithClimb(SuperStructureState withDisk) {
+    private static void selectPosition(SuperStructureState withDisk) {
 
         sendCommandToSuperstructure(withDisk);
 
@@ -90,7 +87,7 @@ public class SuperStructureCommand{
     }
 
     private static void sendCommandToSuperstructure(SuperStructureState position) {
-        SuperStructureSubsystemContainer ss = SuperStructureSubsystemContainer.getInstance();
+        SuperStructure ss = SuperStructure.getInstance();
         ss.setGoal(new SuperStructureGoal(position));
     }
 

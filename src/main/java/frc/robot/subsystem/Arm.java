@@ -9,10 +9,10 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 
 import frc.robot.Constants;
 import static frc.robot.Constants.SuperStructureConstants;
-import frc.lib.motor.MotorUtil;
+import frc.lib.motor.MotorUtility;
 import frc.lib.utility.TestIfChanged;
 
-public class Arm extends SuperStructureComponenet{
+public class Arm extends SingleMasterMotorSubsystem{
     private static Arm instance_;
 
     private boolean isBackingToInitialMode_ = false;
@@ -39,13 +39,13 @@ public class Arm extends SuperStructureComponenet{
         int reverselimit = level1 + SuperStructureConstants.reverselimit_from_lvl1;
         int forwardlimit = level1 + SuperStructureConstants.forwardlimit_from_lvl1;
 
-        MotorUtil.checkError(master_.configReverseSoftLimitThreshold(reverselimit),
+        MotorUtility.checkError(master_.configReverseSoftLimitThreshold(reverselimit),
         "Unable to configReverseSoftLimitThreshold(reverselimit) for arm");
 
-        MotorUtil.checkError(master_.configForwardSoftLimitThreshold(forwardlimit),
+        MotorUtility.checkError(master_.configForwardSoftLimitThreshold(forwardlimit),
         "Unable to configForwardSoftLimitThreshold(forwardlimit) for arm");
 
-        MotorUtil.checkError(master_.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
+        MotorUtility.checkError(master_.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
         LimitSwitchNormal.NormallyOpen, Constants.kLongCANTimeoutMs),
         "Unable to set reverse limit switch for arm.");
 
@@ -95,7 +95,7 @@ public class Arm extends SuperStructureComponenet{
                 isBackingToInitialMode_ = false;
             }
 
-            if(controlMode_ == SuperStructureComponentMode.OPEN_LOOP) {
+            if(controlMode_ == ControlType.OPEN_LOOP) {
                 master_.set(ControlMode.PercentOutput, feedData_.demand, DemandType.ArbitraryFeedForward,
                 0.0);
             } else {

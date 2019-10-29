@@ -5,8 +5,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.cycle.Cycle_in;
-import frc.robot.drive.Drivebase;
-import frc.robot.drive.SM_Driver;
+import frc.robot.cycle.Subsystem_Cycle_Manager;
+import frc.robot.subsystem.Drivebase;
+import frc.lib.utility.SM_Driver;
 import frc.robot.joystick_control.MainControlBoard;
 import frc.lib.utility.DriveSignal;
 import frc.robot.subsystem.*;
@@ -28,13 +29,13 @@ public class Robot extends TimedRobot {
   private final Arm arm_ = Arm.getInstance();
   private final Wrist wrist_ = Wrist.getInstance();
   private final Infrastructure infrastructure_ = Infrastructure.getInstance();
-  private final SuperStructureSubsystemContainer superStructure_ = SuperStructureSubsystemContainer.getInstance();
+  private final SuperStructure superstructure_ = SuperStructure.getInstance();
   private final Drivebase drivebase_ = Drivebase.getInstance();
   private final Subsystem_Cycle_Manager subsystem_Cycle_Manager_ = new Subsystem_Cycle_Manager(
     Arrays.asList(
       arm_,
       wrist_,
-      superStructure_,
+      superstructure_,
       infrastructure_,
       drivebase_
     )
@@ -48,6 +49,7 @@ public class Robot extends TimedRobot {
     try{
       drivebase_.resetSensors();
       SuperStructureCommand.goToScoreDiskLow(false);
+      //SuperStructureCommand.goToScoreDiskHigh(true);
 
       subsystem_Cycle_Manager_.registerEnabledLoops(enabledLooper_);
       subsystem_Cycle_Manager_.registerDisabledLoops(disabledLooper_);

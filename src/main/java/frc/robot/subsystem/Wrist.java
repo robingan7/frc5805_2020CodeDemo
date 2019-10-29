@@ -5,9 +5,8 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 import frc.robot.Constants;
-import frc.lib.motor.MotorUtil;
 
-public class Wrist extends SuperStructureComponenet{
+public class Wrist extends SingleMasterMotorSubsystem{
     private static Wrist instance_;
     private int facefront;
     private DoubleSolenoid grabber_;

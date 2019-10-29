@@ -1,4 +1,4 @@
-package frc.robot.drive;
+package frc.robot.subsystem;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.motorcontrol.*;
@@ -11,13 +11,14 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.cycle.*;
-import frc.lib.motor.MotorUtil;
+import frc.lib.motor.MotorUtility;
 import frc.robot.Constants;
-import frc.robot.subsystem.Subsystem_Function;
+import frc.robot.cycle.Subsystem_Cycle;;
 
-public class Drivebase extends Subsystem_Function{
+public class Drivebase extends Subsystem_Cycle{
     private final WPI_TalonSRX leftMaster_, rightMaster_;
     private final WPI_VictorSPX leftSlaveA_, rightSlaveA_, leftSlaveB_, rightSlaveB_;
 
@@ -32,7 +33,7 @@ public class Drivebase extends Subsystem_Function{
     private static final int kLowGearVelocityControlSlot = 0;
     private static final int kHighGearVelocityControlSlot = 1;
 
-    private Rotation2d mGyroOffset = Rotation2d.default_;
+    private Rotation2D mGyroOffset = Rotation2D.identity();
 
     private DriveControlState currentDriveState;
     private boolean isBrakeMode_, isHighGear_, isFrontLifted_, isBackLifted_, autoShift_;
@@ -55,7 +56,7 @@ public class Drivebase extends Subsystem_Function{
                     case OPEN_LOOP:
                         break;
                     case PATH_FOLLOWING:
-                        //updatePathFollower(); Hope we have that
+                        //updatePathFollower(); let's get it done
                         break;
                     default:
                         System.out.println("Unexpected drive control state: " + currentDriveState);
@@ -84,26 +85,26 @@ public class Drivebase extends Subsystem_Function{
     public Drivebase(){
         feedData_= new FeedData();
          // Start all Talons in open loop mode.
-         leftMaster_ = MotorUtil.createTalon( Constants.kLeftDriveMasterId);
+         leftMaster_ = MotorUtility.createTalon( Constants.kLeftDriveMasterId);
          configureMaster(leftMaster_, true);
  
-         leftSlaveA_ = MotorUtil.createVictor(Constants.kLeftDriveSlaveAId,
+         leftSlaveA_ = MotorUtility.createVictor(Constants.kLeftDriveSlaveAId,
                  Constants.kLeftDriveMasterId);
          leftSlaveA_.setInverted(false);
  
-         leftSlaveB_ = MotorUtil.createVictor(Constants.kLeftDriveSlaveBId,
+         leftSlaveB_ = MotorUtility.createVictor(Constants.kLeftDriveSlaveBId,
                  Constants.kLeftDriveMasterId);
          leftSlaveB_.setInverted(false);
 
  
-         rightMaster_ = MotorUtil.createTalon(Constants.kRightDriveMasterId);
+         rightMaster_ = MotorUtility.createTalon(Constants.kRightDriveMasterId);
          configureMaster(rightMaster_, true);
  
-         rightSlaveA_ = MotorUtil.createVictor(Constants.kRightDriveSlaveAId,
+         rightSlaveA_ = MotorUtility.createVictor(Constants.kRightDriveSlaveAId,
                  Constants.kRightDriveMasterId);
          //rightSlaveA_.setInverted(true);
  
-         rightSlaveB_ = MotorUtil.createVictor(Constants.kRightDriveSlaveBId,
+         rightSlaveB_ = MotorUtility.createVictor(Constants.kRightDriveSlaveBId,
                  Constants.kRightDriveMasterId);
          //rightSlaveB_.setInverted(true);
  
@@ -193,7 +194,7 @@ public class Drivebase extends Subsystem_Function{
     }
 
     public void resetSensors() {
-        setHeading(Rotation2d.default_);
+        setHeading(Rotation2D.identity());
         resetEncoders();
         autoShift_ = true;
 
@@ -202,11 +203,11 @@ public class Drivebase extends Subsystem_Function{
         backLifter_.set(false);
     }
 
-    public synchronized void setHeading(Rotation2d heading) {
-        System.out.println("SET HEADING: " + heading.getDegreeFromCoord());
+    public synchronized void setHeading(Rotation2D heading) {
+        System.out.println("SET HEADING: " + heading.getDegrees());
 
-        //mGyroOffset = heading.rotateFromAnother(Rotation2d.fromAngle(mPigeonIMU.getFusedHeading()).inverse());
-        System.out.println("Gyro offset: " + mGyroOffset.getDegreeFromCoord());
+        //mGyroOffset = heading.rotateFromAnother(Rotation2D.fromAngle(mPigeonIMU.getFusedHeading()).inverse());
+        System.out.println("Gyro offset: " + mGyroOffset.getDegrees());
 
         feedData_.gyro_heading = heading;
     }
@@ -231,7 +232,7 @@ public class Drivebase extends Subsystem_Function{
         feedData_.right_feedforward = 0.0;
     }
 
-    public synchronized Rotation2d getHeading() {
+    public synchronized Rotation2D getHeading() {
         return feedData_.gyro_heading;
     }
 
@@ -295,8 +296,8 @@ public class Drivebase extends Subsystem_Function{
         public double right_distance;
         public int left_velocity_ticks_per_100ms;
         public int right_velocity_ticks_per_100ms;
-        public Rotation2d gyro_heading = Rotation2d.default_;
-        public Pose2d error = Pose2d.default_;
+        public Rotation2D gyro_heading = Rotation2D.identity();
+        public Pose2D error = Pose2D.identity();
 
         // Motion Profile Feedforward 
         public double left_accel;
@@ -348,7 +349,7 @@ public class Drivebase extends Subsystem_Function{
             feedData_.right_position_ticks = rightMaster_.getSelectedSensorPosition(0);
             feedData_.left_velocity_ticks_per_100ms = leftMaster_.getSelectedSensorVelocity(0);
             feedData_.right_velocity_ticks_per_100ms = rightMaster_.getSelectedSensorVelocity(0);
-            //feedData_.gyro_heading = Rotation2d.fromAngle(mPigeonIMU.getFusedHeading()).rotateFromAnother(mGyroOffset);
+            //feedData_.gyro_heading = Rotation2D.fromAngle(mPigeonIMU.getFusedHeading()).rotateFromAnother(mGyroOffset);
     
             double deltaLeftTicks = ((feedData_.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
             if (deltaLeftTicks > 0.0) {
@@ -370,6 +371,12 @@ public class Drivebase extends Subsystem_Function{
             }*/
     
             // System.out.println("control state: " + mDriveControlState + ", left: " + feedData_.left_demand + ", right: " + feedData_.right_demand);
+    }
+
+    @Override 
+    public void sendDataToSmartDashboard(){
+        SmartDashboard.putNumber("right: ", rightMaster_.getSelectedSensorPosition());
+        SmartDashboard.putNumber("left: ", leftMaster_.getSelectedSensorPosition());
     }
 
     @Override

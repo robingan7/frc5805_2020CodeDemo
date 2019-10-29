@@ -1,62 +1,159 @@
-
 package frc.lib.waypoint;
 
-public class Translation2d implements InterpolateSingle<Translation2d>{
-    protected double x_, y_; 
-    public static Translation2d default_= new Translation2d();
+import frc.lib.utility.Utility;
+import static frc.lib.utility.Utility.EPSILON;
 
-    public Translation2d(){
+import java.text.DecimalFormat;
+
+/**
+ * A translation in a 2d coordinate frame. Translations are simply shifts in an (x, y) plane.
+ */
+public class Translation2D implements InterpolateSingle<Translation2D> {
+    protected static final Translation2D kIdentity = new Translation2D();
+
+    public static Translation2D identity() {
+        return kIdentity;
+    }
+
+    protected final double x_;
+    protected final double y_;
+
+    public Translation2D() {
         x_ = 0;
         y_ = 0;
     }
 
-    public Translation2d(final double x, final double y){
+    public Translation2D(double x, double y) {
         x_ = x;
         y_ = y;
     }
 
-    public Translation2d(final Translation2d other){
+    public Translation2D(final Translation2D other) {
         x_ = other.x_;
         y_ = other.y_;
     }
 
-
-    public Translation2d(final Translation2d start, final Translation2d end){
+    public Translation2D(final Translation2D start, final Translation2D end) {
         x_ = end.x_ - start.x_;
         y_ = end.y_ - start.y_;
     }
 
-    //------get value methods---------
-    public double getNorm(){
+    /**
+     * The "norm" of a transform is the Euclidean distance in x and y.
+     *
+     * @return sqrt(x ^ 2 + y ^ 2)
+     */
+    public double norm() {
         return Math.hypot(x_, y_);
     }
-    public double getNorm2(){
-        return Math.pow(x_, 2) + Math.pow(y_, 2);
-    }
-    //------moving medthods-----------
-    public Translation2d translateby(Translation2d other){
-        return new Translation2d(other);
+
+    public double norm2() {
+        return x_ * x_ + y_ * y_;
     }
 
-    public Translation2d rotateBy(Rotation2d rotate){
-        return new Translation2d(x_ * rotate.cos() + y_ * rotate.sin(), x_ * rotate.sin() + y_ * rotate.cos());
+    public double x() {
+        return x_;
     }
 
-    public Translation2d inverse(){
-        return new Translation2d(-x_, -y_);
+    public double y() {
+        return y_;
+    }
+
+    /**
+     * We can compose Translation2D's by adding together the x and y shifts.
+     *
+     * @param other The other translation to add.
+     * @return The combined effect of translating by this object and the other.
+     */
+    public Translation2D translateBy(final Translation2D other) {
+        return new Translation2D(x_ + other.x_, y_ + other.y_);
+    }
+
+    /**
+     * We can also rotate Translation2D's. See: https://en.wikipedia.org/wiki/Rotation_matrix
+     *
+     * @param rotation The rotation to apply.
+     * @return This translation rotated by rotation.
+     */
+    public Translation2D rotateBy(final Rotation2D rotation) {
+        return new Translation2D(x_ * rotation.cos() - y_ * rotation.sin(), x_ * rotation.sin() + y_ * rotation.cos());
+    }
+
+    public Rotation2D direction() {
+        return new Rotation2D(x_, y_, true);
+    }
+
+    /**
+     * The inverse simply means a Translation2D that "undoes" this object.
+     *
+     * @return Translation by -x and -y.
+     */
+    public Translation2D inverse() {
+        return new Translation2D(-x_, -y_);
     }
 
     @Override
-    public Translation2d interpolate(final Translation2d other, double x) {
+    public Translation2D interpolate(final Translation2D other, double x) {
         if (x <= 0) {
-            return new Translation2d(this);
+            return new Translation2D(this);
         } else if (x >= 1) {
-            return new Translation2d(other);
+            return new Translation2D(other);
         }
         return extrapolate(other, x);
     }
 
-    public Translation2d extrapolate(final Translation2d other, double x) {
-        return new Translation2d(x * (other.x_ - x_) + x_, x * (other.y_ - y_) + y_);
-    } 
+    public Translation2D extrapolate(final Translation2D other, double x) {
+        return new Translation2D(x * (other.x_ - x_) + x_, x * (other.y_ - y_) + y_);
+    }
+
+    public Translation2D scale(double s) {
+        return new Translation2D(x_ * s, y_ * s);
+    }
+
+    public boolean epsilonEquals(final Translation2D other, double epsilon) {
+        return Utility.epsilonEquals(x(), other.x(), epsilon) && Utility.epsilonEquals(y(), other.y(), epsilon);
+    }
+
+    @Override
+    public String toString() {
+        final DecimalFormat format = new DecimalFormat("#0.000");
+        return "(" + format.format(x_) + "," + format.format(y_) + ")";
+    }
+
+    public String toCSV() {
+        final DecimalFormat format = new DecimalFormat("#0.000");
+        return format.format(x_) + "," + format.format(y_);
+    }
+
+    public static double dot(final Translation2D a, final Translation2D b) {
+        return a.x_ * b.x_ + a.y_ * b.y_;
+    }
+
+    public static Rotation2D getAngle(final Translation2D a, final Translation2D b) {
+        double cos_angle = dot(a, b) / (a.norm() * b.norm());
+        if (Double.isNaN(cos_angle)) {
+            return new Rotation2D();
+        }
+        return Rotation2D.fromRadians(Math.acos(Utility.limit(cos_angle, 1.0)));
+    }
+
+    public static double cross(final Translation2D a, final Translation2D b) {
+        return a.x_ * b.y_ - a.y_ * b.x_;
+    }
+
+    public double distance(final Translation2D other) {
+        return inverse().translateBy(other).norm();
+    }
+
+    public boolean equals(final Object other) {
+        if (!(other instanceof Translation2D)) {
+            return false;
+        }
+
+        return distance((Translation2D) other) < Utility.EPSILON;
+    }
+
+    public Translation2D getTranslation() {
+        return this;
+    }
 }

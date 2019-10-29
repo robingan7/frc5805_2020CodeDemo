@@ -3,11 +3,11 @@ package frc.lib.path;
 import frc.lib.waypoint.*;
 
 public class PathSegment{
-    private Translation2d start;
-    private Translation2d end;
-    private Translation2d center;
-    private Translation2d deltaStart;
-    private Translation2d deltaEnd;
+    private Translation2D start;
+    private Translation2D end;
+    private Translation2D center;
+    private Translation2D deltaStart;
+    private Translation2D deltaEnd;
     private double maxSpeed;
     private boolean isLine;
     //private MotionProfile speedController;

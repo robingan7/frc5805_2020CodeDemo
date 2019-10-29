@@ -1,7 +1,7 @@
 package frc.lib.motion_profile;
 
-import static frc.lib.utility.Utli.EPSILON;
-import static frc.lib.utility.Utli.epsilonEquals;
+import static frc.lib.utility.Utility.EPSILON;
+import static frc.lib.utility.Utility.epsilonEquals;
 
 import java.util.ArrayList;
 import java.util.Iterator;

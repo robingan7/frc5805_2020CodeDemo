@@ -1,6 +1,6 @@
 package frc.lib.motion_profile;
 
-import static frc.lib.utility.Utli.epsilonEquals;
+import static frc.lib.utility.Utility.epsilonEquals;
 /**
  * A MotionProfileGoal defines a desired position and maximum velocity (at this position), along with the behavior that
  * should be used to determine if we are at the goal and what to do if it is infeasible to reach the goal within the

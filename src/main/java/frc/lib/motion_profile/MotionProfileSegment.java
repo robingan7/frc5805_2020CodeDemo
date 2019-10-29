@@ -1,7 +1,7 @@
 package frc.lib.motion_profile;
 
-import static frc.lib.utility.Utli.EPSILON;
-import static frc.lib.utility.Utli.epsilonEquals;
+import static frc.lib.utility.Utility.EPSILON;
+import static frc.lib.utility.Utility.epsilonEquals;
 
 /**
  * A MotionProfileSegment is a movement from a start MotionProfilePoint to an end MotionProfilePoint with a constant acceleration.

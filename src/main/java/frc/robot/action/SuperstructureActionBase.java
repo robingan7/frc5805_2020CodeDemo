@@ -1,9 +1,9 @@
 package frc.robot.action;
 
-import frc.robot.subsystem.SuperStructureSubsystemContainer;
+import frc.robot.subsystem.SuperStructure;
 
 public abstract class SuperstructureActionBase implements Action{
-    protected final SuperStructureSubsystemContainer superStructure_ = SuperStructureSubsystemContainer.getInstance();
+    protected final SuperStructure superStructure_ = SuperStructure.getInstance();
     protected boolean waitForAction_;
 
     public SuperstructureActionBase(boolean waitForAction){

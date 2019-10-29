@@ -3,10 +3,10 @@ package frc.robot.subsystem;
 import edu.wpi.first.wpilibj.Compressor;
 import frc.robot.cycle.*;
 
-public class Infrastructure extends Subsystem_Function {
+public class Infrastructure extends Subsystem_Cycle {
     private static Infrastructure instance_;
 
-    private SuperStructureSubsystemContainer superStructure_ = SuperStructureSubsystemContainer.getInstance();
+    private SuperStructure superStructure_ = SuperStructure.getInstance();
     private Compressor compressor_ = new Compressor();
 
     private boolean isManualControl_ = true;

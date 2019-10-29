@@ -1,106 +1,239 @@
+package frc.lib.waypoint;
+
+import frc.lib.utility.Utility;
+
+import java.text.DecimalFormat;
+
+import static frc.lib.utility.Utility.EPSILON;
+
 /**
- * it presents a point on a unit circle
+ * A rotation in a 2d coordinate frame represented a point on the unit circle
+ * (cosine and sine).
+ * <p>
+ * Inspired by Sophus (https://github.com/strasdat/Sophus/tree/master/sophus)
  */
+public class Rotation2D implements InterpolateSingle<Rotation2D> {
+    protected static final Rotation2D kIdentity = new Rotation2D();
 
- package frc.lib.waypoint;
+    public static Rotation2D identity() {
+        return kIdentity;
+    }
 
- import static frc.lib.utility.Utli.EPSILON;;
- public class Rotation2d implements InterpolateSingle<Rotation2d>{
-    protected double cos_,sin_;
-    public static Rotation2d default_ =new Rotation2d();
-    public Rotation2d(double cos, double sin, boolean need_foreced_rescale){
-        if(need_foreced_rescale){
-            double magnitude = Math.hypot(cos, sin);
+    protected double cos_angle_ = Double.NaN;
+    protected double sin_angle_ = Double.NaN;
+    protected double radians_ = Double.NaN;
 
-            if(magnitude > EPSILON){
-                cos_ = cos / magnitude;
-                sin_ = sin / magnitude;
-            }else{
-                sin_ = 0;
-                cos_ = 1;
+    protected Rotation2D(double x, double y, double radians) {
+        cos_angle_ = x;
+        sin_angle_ = y;
+        radians_ = radians;
+    }
+
+    public Rotation2D() {
+        this(1.0, 0.0, 0.0);
+    }
+
+    public Rotation2D(double radians, boolean normalize) {
+        if (normalize) {
+            radians = WrapRadians(radians);
+        }
+        radians_ = radians;
+    }
+
+    public Rotation2D(double x, double y, boolean normalize) {
+        if (normalize) {
+            // From trig, we know that sin^2 + cos^2 == 1, but as we do math on this object
+            // we might accumulate rounding errors.
+            // Normalizing forces us to re-scale the sin and cos to reset rounding errors.
+            double magnitude = Math.hypot(x, y);
+            if (magnitude > EPSILON) {
+                sin_angle_ = y / magnitude;
+                cos_angle_ = x / magnitude;
+            } else {
+                sin_angle_ = 0.0;
+                cos_angle_ = 1.0;
             }
-        }else{
-            cos_ = cos;
-            sin_ = sin;
+        } else {
+            cos_angle_ = x;
+            sin_angle_ = y;
         }
     }
 
-    public Rotation2d(Rotation2d other){
-        cos_ = other.cos_;
-        sin_ = other.sin_;
+    public Rotation2D(final Rotation2D other) {
+        cos_angle_ = other.cos_angle_;
+        sin_angle_ = other.sin_angle_;
+        radians_ = other.radians_;
     }
 
-    public Rotation2d(final Translation2d direction, boolean forced_rescale){
-        this(direction.x_, direction.y_,forced_rescale);
+    public Rotation2D(final Translation2D direction, boolean normalize) {
+        this(direction.x(), direction.y(), normalize);
     }
 
-    public static Rotation2d fromRadian(double angle_in_radians){
-        return new Rotation2d(Math.cos(angle_in_radians),Math.sin(angle_in_radians),false);
+    public static Rotation2D fromRadians(double angle_radians) {
+        return new Rotation2D(angle_radians, true);
     }
 
-    public static Rotation2d fromAngle(double angle_in_degree){
-        return fromRadian(Math.toRadians(angle_in_degree));
+    public static Rotation2D fromDegrees(double angle_degrees) {
+        return fromRadians(Math.toRadians(angle_degrees));
     }
 
-    public Rotation2d(){
-        this(1,0,false);
+    public double cos() {
+        ensureTrigComputed();
+        return cos_angle_;
     }
 
-    //-----get value method--------
-    public double cos(){
-        return cos_;
+    public double sin() {
+        ensureTrigComputed();
+        return sin_angle_;
     }
 
-    public double sin(){
-        return sin_;
-    }
-
-    public double tan(){
-        if(Math.abs(cos_)<EPSILON){// avoid dividing zero
-            if(sin_>=0.0){
+    public double tan() {
+        ensureTrigComputed();
+        if (Math.abs(cos_angle_) < EPSILON) {
+            if (sin_angle_ >= 0.0) {
                 return Double.POSITIVE_INFINITY;
-            }else{
+            } else {
                 return Double.NEGATIVE_INFINITY;
             }
-        }else{
-            return sin_ / cos_;
         }
+        return sin_angle_ / cos_angle_;
     }
 
-    public double getRadianFromCoord(){
-        return Math.atan2(sin_, cos_);
+    public double getRadians() {
+        ensureRadiansComputed();
+        return radians_;
     }
 
-    public double getDegreeFromCoord(){
-        return Math.toDegrees(getRadianFromCoord());
-    }
-
-    //---------moving methods--------
-    public Rotation2d inverse(){
-        return new Rotation2d(cos_, -sin_, false);
+    public double getDegrees() {
+        return Math.toDegrees(getRadians());
     }
 
     /**
-     * inspire by this link
-     *@see <a href="http://mathworld.wolfram.com/TrigonometricAdditionFormulas.html">
-        Trigonometric Addition Formulas</a> 
+     * We can rotate this Rotation2D by adding together the effects of it and
+     * another rotation.
+     *
+     * @param other The other rotation. See:
+     *              https://en.wikipedia.org/wiki/Rotation_matrix
+     * @return This rotation rotated by other.
      */
-    public Rotation2d rotateFromAnother(final Rotation2d other){
-        return new Rotation2d(cos_ * other.cos() - sin_ * other.sin(),
-                            cos_ * other.sin()+sin_ * other.cos(), true);
-    }
-
-    public Rotation2d interpolate(final Rotation2d other, double x) {
-        if (x <= 0) {
-            return new Rotation2d(this);
-        } else if (x >= 1) {
-            return new Rotation2d(other);
+    public Rotation2D rotateBy(final Rotation2D other) {
+        if (hasTrig() && other.hasTrig()) {
+            return new Rotation2D(cos_angle_ * other.cos_angle_ - sin_angle_ * other.sin_angle_,
+                    cos_angle_ * other.sin_angle_ + sin_angle_ * other.cos_angle_, true);
+        } else {
+            return fromRadians(getRadians() + other.getRadians());
         }
-        double angle_diff = inverse().rotateFromAnother(other).getRadianFromCoord();
-        return this.rotateFromAnother(Rotation2d.fromRadian(angle_diff * x));
     }
 
-    public Rotation2d getCurrentRotation(){
+    public Rotation2D normal() {
+        if (hasTrig()) {
+            return new Rotation2D(-sin_angle_, cos_angle_, false);
+        } else {
+            return fromRadians(getRadians() - Math.PI / 2.0);
+        }
+    }
+
+    /**
+     * The inverse of a Rotation2D "undoes" the effect of this rotation.
+     *
+     * @return The opposite of this rotation.
+     */
+    public Rotation2D inverse() {
+        if (hasTrig()) {
+            return new Rotation2D(cos_angle_, -sin_angle_, false);
+        } else {
+            return fromRadians(-getRadians());
+        }
+    }
+
+    public boolean isParallel(final Rotation2D other) {
+        if (hasRadians() && other.hasRadians()) {
+            return Utility.epsilonEquals(radians_, other.radians_)
+                    || Utility.epsilonEquals(radians_, WrapRadians(other.radians_ + Math.PI));
+        } else if (hasTrig() && other.hasTrig()) {
+            return Utility.epsilonEquals(sin_angle_, other.sin_angle_) && Utility.epsilonEquals(cos_angle_, other.cos_angle_);
+        } else {
+            // Use public, checked version.
+            return Utility.epsilonEquals(getRadians(), other.getRadians())
+                    || Utility.epsilonEquals(radians_, WrapRadians(other.radians_ + Math.PI));
+        }
+    }
+
+    public Translation2D toTranslation() {
+        ensureTrigComputed();
+        return new Translation2D(cos_angle_, sin_angle_);
+    }
+
+    protected double WrapRadians(double radians) {
+        final double k2Pi = 2.0 * Math.PI;
+        radians = radians % k2Pi;
+        radians = (radians + k2Pi) % k2Pi;
+        if (radians > Math.PI)
+            radians -= k2Pi;
+        return radians;
+    }
+
+    private boolean hasTrig() {
+        return !Double.isNaN(sin_angle_) && !Double.isNaN(cos_angle_);
+    }
+
+    private boolean hasRadians() {
+        return !Double.isNaN(radians_);
+    }
+
+    private void ensureTrigComputed() {
+        if (!hasTrig()) {
+            if (Double.isNaN(radians_)) {
+                System.err.println("HEY");
+            }
+            sin_angle_ = Math.sin(radians_);
+            cos_angle_ = Math.cos(radians_);
+        }
+    }
+
+    private void ensureRadiansComputed() {
+        if (!hasRadians()) {
+            if (Double.isNaN(cos_angle_) || Double.isNaN(sin_angle_)) {
+                System.err.println("HEY");
+            }
+            radians_ = Math.atan2(sin_angle_, cos_angle_);
+        }
+    }
+
+    @Override
+    public Rotation2D interpolate(final Rotation2D other, double x) {
+        if (x <= 0.0) {
+            return new Rotation2D(this);
+        } else if (x >= 1.0) {
+            return new Rotation2D(other);
+        }
+        double angle_diff = inverse().rotateBy(other).getRadians();
+        return this.rotateBy(Rotation2D.fromRadians(angle_diff * x));
+    }
+
+    @Override
+    public String toString() {
+        return "(" + new DecimalFormat("#0.000").format(getDegrees()) + " deg)";
+    }
+
+    public String toCSV() {
+        return new DecimalFormat("#0.000").format(getDegrees());
+    }
+
+    public double distance(final Rotation2D other) {
+        return inverse().rotateBy(other).getRadians();
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (!(other instanceof Rotation2D)) {
+            return false;
+        }
+
+        return distance((Rotation2D) other) < Utility.EPSILON;
+    }
+
+    public Rotation2D getRotation() {
         return this;
     }
- }
+}

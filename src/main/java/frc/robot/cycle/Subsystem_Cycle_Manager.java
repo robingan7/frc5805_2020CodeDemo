@@ -1,7 +1,6 @@
-package frc.robot.subsystem;
+package frc.robot.cycle;
 
 import frc.robot.cycle.*;
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -11,10 +10,10 @@ import java.util.ArrayList;
  */
 public class Subsystem_Cycle_Manager implements ICycle_in{
    
-    private final List<Subsystem_Function> allSubsystems_;//includes subsystems themselves
+    private final List<Subsystem_Cycle> allSubsystems_;//includes subsystems themselves
     private List<Cycle> cycles_ = new ArrayList<>();//includes cycles in subsystems
 
-    public Subsystem_Cycle_Manager(List<Subsystem_Function> allSubsystems) {
+    public Subsystem_Cycle_Manager(List<Subsystem_Cycle> allSubsystems) {
         allSubsystems_ = allSubsystems;
     }
 
@@ -29,9 +28,10 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
         @Override
         public void onLoop(double timestamp) {
-            allSubsystems_.forEach(Subsystem_Function::update_subsystem);
+            allSubsystems_.forEach(Subsystem_Cycle::update_subsystem);
             cycles_.forEach(c -> c.onLoop(timestamp));
-            allSubsystems_.forEach(Subsystem_Function::move_subsystem);
+            allSubsystems_.forEach(Subsystem_Cycle::move_subsystem);
+            sendAllDataToSmartDashboard();
         }
         @Override
         public void onStop(double timestamp) {
@@ -48,7 +48,7 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
         @Override
         public void onLoop(double timestamp) {
-            allSubsystems_.forEach(Subsystem_Function::update_subsystem);
+            allSubsystems_.forEach(Subsystem_Cycle::update_subsystem);
         }
 
         @Override
@@ -71,13 +71,13 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
 
     @Override
     public void sendAllDataToSmartDashboard(){
-        allSubsystems_.forEach(Subsystem_Function::sendDataToSmartDashboard);
+        allSubsystems_.forEach(Subsystem_Cycle::sendDataToSmartDashboard);
     }
 
     public boolean checkSubsystems() {
         boolean ret_val = true;
 
-        for (Subsystem_Function s : allSubsystems_) {
+        for (Subsystem_Cycle s : allSubsystems_) {
             ret_val &= s.checkSubsystem();
         }
 
