@@ -79,15 +79,15 @@ public abstract class SingleMasterMotorSubsystem extends Subsystem_Cycle {
                 constants_.kName + ": Could not set closed loop ramp rate: ");
 
         MotorUtility.checkError(
-                master_.configContinuousCurrentLimit(constants_.kContinuousCurrentLimit, Constants.kLongCANTimeoutMs),
+                master_.configContinuousCurrentLimit(constants_.kContinuousCurrentLimit),
                 constants_.kName + ": Could not set continuous current limit.");
 
         MotorUtility.checkError(
-                master_.configPeakCurrentLimit(constants_.kPeakCurrentLimit, Constants.kLongCANTimeoutMs),
+                master_.configPeakCurrentLimit(constants_.kPeakCurrentLimit),
                 constants_.kName + ": Could not set peak current limit.");
 
         MotorUtility.checkError(
-                master_.configPeakCurrentDuration(constants_.kPeakCurrentDuration, Constants.kLongCANTimeoutMs),
+                master_.configPeakCurrentDuration(constants_.kPeakCurrentDuration),
                 constants_.kName + ": Could not set peak current duration.");
         master_.enableCurrentLimit(true);
 
@@ -206,7 +206,7 @@ public abstract class SingleMasterMotorSubsystem extends Subsystem_Cycle {
                     feedData_.feedforward);
         } else {
             master_.set(ControlMode.PercentOutput, feedData_.demand, DemandType.ArbitraryFeedForward,
-                        feedData_.output_percent);
+                        feedData_.feedforward);
         } 
     }
 
