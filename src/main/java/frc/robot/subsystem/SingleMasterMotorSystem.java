@@ -102,7 +102,7 @@ public abstract class SingleMasterMotorSystem extends Subsystem_Cycle {
 
         master_.enableVoltageCompensation(true);
         master_.setInverted(constants_.kMasterConstants.invert_motor);
-        master_.setSensorPhase(constants_.kMasterConstants.invert_sensor_phase);
+        //master_.setSensorPhase(constants_.kMasterConstants.invert_sensor_phase);
         master_.setNeutralMode(NeutralMode.Brake);
         //master_.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 10, 20);
         //master_.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, 20);
@@ -193,13 +193,8 @@ public abstract class SingleMasterMotorSystem extends Subsystem_Cycle {
 
     @Override
     public synchronized void move_subsystem(){
-        if(constants_.kName == "Wrist"){
-            System.out.println("demand: " +  feedData_.demand + "\ncontrol mode: " + master_.getControlMode()
-            + "\nmotor percent: " + master_.getMotorOutputPercent());
-            System.out.println();
-        }
         if (controlMode_ == ControlType.MOTION_MAGIC) {
-            master_.set(ControlMode.Position, feedData_.demand, DemandType.ArbitraryFeedForward,
+            master_.set(ControlMode.MotionMagic, feedData_.demand, DemandType.ArbitraryFeedForward,
                     feedData_.feedforward);
         } else if (controlMode_ == ControlType.MOTION_PROFILE) {
             master_.set(ControlMode.Position, feedData_.demand, DemandType.ArbitraryFeedForward,

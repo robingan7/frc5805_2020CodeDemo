@@ -168,7 +168,7 @@ public class Constants{
         kWrist.kName = "Wrist";
 
         kWrist.kMasterConstants.id = 17;
-        kWrist.kMasterConstants.invert_motor = true;
+        kWrist.kMasterConstants.invert_motor = false;
         kWrist.kMasterConstants.invert_sensor_phase = false;
         kWrist.kSlaveConstants = new VictorSRXConstants[0];
 
@@ -188,8 +188,8 @@ public class Constants{
         kWrist.kMaxUnitsLimit = 31.1; // inches
         kWrist.kMinUnitsLimit = 0.0; // inches
 
-        kWrist.kCruiseVelocity = 2000; // should be 2000
-        kWrist.kAcceleration = 3000; // should be 3000
+        kWrist.kCruiseVelocity = 200; // should be 2000
+        kWrist.kAcceleration = 300; // should be 3000
         kWrist.kRampRate = 0.005; // s
         kWrist.kContinuousCurrentLimit = 20; // amps
         kWrist.kPeakCurrentLimit = 40; // amps

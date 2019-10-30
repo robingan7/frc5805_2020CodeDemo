@@ -48,11 +48,11 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     try{
       drivebase_.resetSensors();
-      SuperStructureCommand.goToScoreDiskLow(false);
       //SuperStructureCommand.goToScoreDiskHigh(true);
 
       subsystem_Cycle_Manager_.registerEnabledLoops(enabledLooper_);
       subsystem_Cycle_Manager_.registerDisabledLoops(disabledLooper_);
+      SuperStructureCommand.goToScoreDiskLow(false);
 
       autoModeChooser_.updateModeCreator();
     }catch(Throwable t){
