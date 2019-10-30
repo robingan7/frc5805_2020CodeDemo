@@ -76,7 +76,7 @@ public class Constants{
         public boolean invert_sensor_phase = false;
     }
 
-    public static class SuperStructurComponentConstants {
+    public static class SingleMasterMotorSystemConfig {
         public String kName = "ERROR_ASSIGN_A_NAME";
 
         public VictorSRXConstants kMasterConstants = new VictorSRXConstants();
@@ -121,7 +121,7 @@ public class Constants{
 
     // Superstructure Constants
     // arm
-    public static final SuperStructurComponentConstants kArm = new SuperStructurComponentConstants();
+    public static final SingleMasterMotorSystemConfig kArm = new SingleMasterMotorSystemConfig();
     static {
         kArm.kName = "Arm";
 
@@ -163,7 +163,7 @@ public class Constants{
     }
 
     //wrist constant
-    public static final SuperStructurComponentConstants kWrist = new SuperStructurComponentConstants();
+    public static final SingleMasterMotorSystemConfig kWrist = new SingleMasterMotorSystemConfig();
     static {
         kWrist.kName = "Wrist";
 
@@ -209,7 +209,7 @@ public class Constants{
         //Arm position
         public static final int startmatch_from_level1 = 1407;
         public static final int vertex_from_lvl1 = 6235;
-        public static final int reverselimit_from_lvl1 = -1205;
+        public static final int reverselimit_from_lvl1 = -1510;
         public static final int forwardlimit_from_lvl1 = 13174;
 
         public static final int backlvl1_from_lvl1 = 12550;
@@ -217,7 +217,7 @@ public class Constants{
         public static final int backlvl3_from_lvl1 = 7250;
         public static final int frontlvl3_from_lvl1 = 5518;
         public static final int frontlvl2_from_lvl1 = 2468;
-        public static final int defense_from_lvl1 = -1700;
+        public static final int defense_from_lvl1 = -1500;
 
         //Wrist position
         public static final int faceback_from_facefront = 8376;

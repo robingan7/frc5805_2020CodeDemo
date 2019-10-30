@@ -7,6 +7,8 @@ public interface IOperator_Joystick{
 
     boolean isLvl3();
 
+    boolean isDefense();
+
     boolean isBack();
 
     boolean isOpenManipulator();

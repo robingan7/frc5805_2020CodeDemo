@@ -29,7 +29,7 @@ public class Arm extends SingleMasterMotorSystem{
         return instance_;
     }
 
-    public Arm(final Constants.SuperStructurComponentConstants constant){
+    public Arm(final Constants.SingleMasterMotorSystemConfig constant){
         super(constant);
 
         int startMatch = master_.getSelectedSensorPosition();
@@ -40,14 +40,13 @@ public class Arm extends SingleMasterMotorSystem{
         int forwardlimit = level1 + SuperStructureConstants.forwardlimit_from_lvl1;
 
         MotorUtility.checkError(master_.configReverseSoftLimitThreshold(reverselimit),
-        "Unable to configReverseSoftLimitThreshold(reverselimit) for arm");
+            "Unable to configReverseSoftLimitThreshold(reverselimit) for arm");
 
         MotorUtility.checkError(master_.configForwardSoftLimitThreshold(forwardlimit),
-        "Unable to configForwardSoftLimitThreshold(forwardlimit) for arm");
+            "Unable to configForwardSoftLimitThreshold(forwardlimit) for arm");
 
         MotorUtility.checkError(master_.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
-        LimitSwitchNormal.NormallyOpen, Constants.kLongCANTimeoutMs),
-        "Unable to set reverse limit switch for arm.");
+            LimitSwitchNormal.NormallyOpen, Constants.kLongCANTimeoutMs), "Unable to set reverse limit switch for arm.");
 
         master_.overrideLimitSwitchesEnable(true);
     }

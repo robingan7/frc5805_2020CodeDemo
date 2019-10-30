@@ -40,7 +40,6 @@ public class SuperStructureCommand{
         ScoreDiskMiddleBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl2_from_lvl1, faceback);
         ScoreDiskHighBack = new SuperStructureState(level1 + SuperStructureConstants.backlvl3_from_lvl1, faceback);
 
-        //defense_from_facefront: we don't know yet
         Defense = new SuperStructureState(level1 + SuperStructureConstants.defense_from_lvl1, facefront);
     }
 
@@ -76,6 +75,9 @@ public class SuperStructureCommand{
         mHighPosition = true;
     }
 
+    public static void goToDefense() {
+        selectPosition(Defense);
+    }
     private static void selectPosition(SuperStructureState withDisk) {
 
         sendCommandToSuperstructure(withDisk);

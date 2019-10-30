@@ -126,17 +126,20 @@ public class Robot extends TimedRobot {
     } else if(controlBoard_.getOperatorJoystick().isLvl3()){
       SuperStructureCommand.goToScoreDiskHigh(isArmBack);
 
+    } else if(controlBoard_.getOperatorJoystick().isDefense()){
+      SuperStructureCommand.goToDefense();
+
     }
 
-    if(isChangingGear){
+    if(isChangingGear) {
       drivebase_.setHighGear();
     }
 
-    if(isLiftingFront){
+    if(isLiftingFront) {
       drivebase_.setFrontLifter();
     }
 
-    if(isLiftingBack){
+    if(isLiftingBack) {
       drivebase_.setBackLifter();
     }
 
@@ -187,7 +190,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic(){
+  public void disabledPeriodic() {
     try{
       // Update auto modes
       autoModeChooser_.updateModeCreator();

@@ -38,4 +38,9 @@ public class Operator_Joystick implements IOperator_Joystick{
     public boolean isLvl1(){
         return mOperatorJoystick.getRawButton(3);
     }
+
+    @Override
+    public boolean isDefense(){
+        return mOperatorJoystick.getRawButton(4);
+    }
 }

@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 import frc.robot.Constants;
 
-public class Wrist extends SingleMasterMotorSystem{
+public class Wrist extends SingleMasterMotorSystem {
     private static Wrist instance_;
     private int facefront = 0;
     private DoubleSolenoid grabber_;
@@ -19,11 +19,9 @@ public class Wrist extends SingleMasterMotorSystem{
         return instance_;
     }
 
-    public Wrist(final Constants.SuperStructurComponentConstants constant){
+    public Wrist(final Constants.SingleMasterMotorSystemConfig constant) {
         super(constant);   
         facefront = master_.getSelectedSensorPosition();
-        System.out.println("Face Front: " + facefront);
-        System.out.println("Face Front2: " + master_.getSelectedSensorPosition());
 
         grabber_ = new DoubleSolenoid(Constants.kGrabberF, Constants.kGrabberR);
     }
@@ -32,7 +30,7 @@ public class Wrist extends SingleMasterMotorSystem{
         return facefront;
     }
 
-    public void setGrabber(boolean state){
+    public void setGrabber(boolean state) {
         if(state){
             grabber_.set(Value.kForward);
         }else{
@@ -41,7 +39,7 @@ public class Wrist extends SingleMasterMotorSystem{
     }
     
     @Override 
-    public void sendDataToSmartDashboard(){
+    public void sendDataToSmartDashboard() {
         SmartDashboard.putNumber("Wrist Value", master_.getSelectedSensorPosition());
         SmartDashboard.putNumber("Wrist Current:", master_.getOutputCurrent());
         SmartDashboard.putNumber("Wrist Error: ", master_.getClosedLoopError());
@@ -49,6 +47,7 @@ public class Wrist extends SingleMasterMotorSystem{
         SmartDashboard.putNumber("Wrist Percentage: ", master_.getMotorOutputPercent());
         SmartDashboard.putString("Wrist ControlMode: ", master_.getControlMode().toString());
         SmartDashboard.putNumber("Wrist Error: ", master_.getClosedLoopError());
+        SmartDashboard.putNumber("Wrist Current:", master_.getOutputCurrent());
         SmartDashboard.putNumber("Wrist start Value", facefront);
     }
     
