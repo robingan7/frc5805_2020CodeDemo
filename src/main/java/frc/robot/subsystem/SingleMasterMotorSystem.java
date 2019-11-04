@@ -48,7 +48,7 @@ public abstract class SingleMasterMotorSystem extends Subsystem_Cycle {
         MotorUtility.checkError(master_.configMotionAcceleration(constants_.kAcceleration, Constants.kLongCANTimeoutMs),
                 constants_.kName + ": Could not set acceleration: ");
 
-                /*
+                
         MotorUtility.checkError(master_.configContinuousCurrentLimit(constants_.kContinuousCurrentLimit),
                 constants_.kName + ": Could not set continuous current limit.");
 
@@ -56,7 +56,7 @@ public abstract class SingleMasterMotorSystem extends Subsystem_Cycle {
                 constants_.kName + ": Could not set peak current limit.");
 
         MotorUtility.checkError(master_.configPeakCurrentDuration(constants_.kPeakCurrentDuration),
-                constants_.kName + ": Could not set peak current duration.");*/
+                constants_.kName + ": Could not set peak current duration.");
        
         MotorUtility.checkError(master_.configNominalOutputForward(constants_.kNominalOutputForward, Constants.kLongCANTimeoutMs),
             constants_.kName + ": Could not set configNominalOutputForward()");
