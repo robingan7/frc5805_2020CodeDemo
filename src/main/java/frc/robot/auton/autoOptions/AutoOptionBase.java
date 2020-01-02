@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj.DriverStation;
     public void runAction(Action action) throws AutoEndEarlyException {
         isActiveWithThrow();
         
-
         //wait for interrupt state to be cleared
         while(isActiveWithThrow() && isInterrupted_){
             sleepThread();

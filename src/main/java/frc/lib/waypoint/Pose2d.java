@@ -11,7 +11,7 @@ import static frc.lib.utility.Utility.EPSILON;
  * <p>
  * Inspired by Sophus (https://github.com/strasdat/Sophus/tree/master/sophus)
  */
-public class Pose2D implements InterpolateSingle<Pose2D> {
+public class Pose2D implements Interpolable<Pose2D> {
     protected static final Pose2D kIdentity = new Pose2D();
 
     public static Pose2D identity() {

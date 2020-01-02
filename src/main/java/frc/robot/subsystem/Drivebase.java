@@ -16,7 +16,11 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.cycle.*;
 import frc.lib.motor.MotorUtility;
 import frc.robot.Constants;
-import frc.robot.cycle.Subsystem_Cycle;;
+import frc.robot.cycle.Subsystem_Cycle;
+import frc.lib.path.Path;
+import frc.lib.path.Lookahead;
+import frc.lib.path.PathFollower;
+
 
 public class Drivebase extends Subsystem_Cycle{
     private final WPI_TalonSRX leftMaster_, rightMaster_;
@@ -35,10 +39,14 @@ public class Drivebase extends Subsystem_Cycle{
 
     private Rotation2D mGyroOffset = Rotation2D.identity();
 
-    private DriveControlState currentDriveState;
+    private DriveControlState driveControlState_;
     private boolean isBrakeMode_, isHighGear_, isFrontLifted_, isBackLifted_, autoShift_;
 
     private double lastActiveTime = 0;
+
+     // Controllers
+     private PathFollower pathFollower_;
+     private Path currentPath_ = null;
 
     private final Cycle cycle_ = new Cycle() {
         @Override
@@ -52,14 +60,14 @@ public class Drivebase extends Subsystem_Cycle{
         @Override
         public void onLoop(double timestamp) {
             synchronized (Drivebase.this) {
-                switch (currentDriveState) {
+                switch (driveControlState_) {
                     case OPEN_LOOP:
                         break;
                     case PATH_FOLLOWING:
                         //updatePathFollower(); let's get it done
                         break;
                     default:
-                        System.out.println("Unexpected drive control state: " + currentDriveState);
+                        System.out.println("Unexpected drive control state: " + driveControlState_);
                         break;
                 }
                 //gearShifter_.set(false);
@@ -151,6 +159,17 @@ public class Drivebase extends Subsystem_Cycle{
     public boolean isAbleActive(){
         return Math.abs(lastActiveTime - Timer.getFPGATimestamp()) > 0.9;
     }
+
+    
+    public synchronized boolean isDoneWithPath() {
+        if (driveControlState_ == DriveControlState.PATH_FOLLOWING && pathFollower_ != null) {
+            return pathFollower_.isFinished();
+        } else {
+            System.out.println("Robot is not in path following mode");
+            return true;
+        }
+    }
+
     public synchronized void setFrontLifter() {
         if(isAbleActive()){
             boolean old_value = isFrontLifted_;
@@ -212,14 +231,38 @@ public class Drivebase extends Subsystem_Cycle{
         feedData_.gyro_heading = heading;
     }
 
+     /**
+     * Configures the drivebase to drive a path. Used for autonomous driving
+     *
+     * @see Path
+     */
+    public synchronized void setWantDrivePath(Path path, boolean reversed) {
+        if (currentPath_ != path || driveControlState_ != DriveControlState.PATH_FOLLOWING) {
+            //RobotState.getInstance().resetDistanceDriven();
+            pathFollower_ = new PathFollower(path, reversed, new PathFollower.Parameters(
+                    new Lookahead(Constants.kMinLookAhead, Constants.kMaxLookAhead, Constants.kMinLookAheadSpeed,
+                            Constants.kMaxLookAheadSpeed),
+                    Constants.kInertiaSteeringGain, Constants.kPathFollowingProfileKp,
+                    Constants.kPathFollowingProfileKi, Constants.kPathFollowingProfileKv,
+                    Constants.kPathFollowingProfileKffv, Constants.kPathFollowingProfileKffa,
+                    Constants.kPathFollowingProfileKs, Constants.kPathFollowingMaxVel,
+                    Constants.kPathFollowingMaxAccel, Constants.kPathFollowingGoalPosTolerance,
+                    Constants.kPathFollowingGoalVelTolerance, Constants.kPathStopSteeringDistance));
+            driveControlState_ = DriveControlState.PATH_FOLLOWING;
+            currentPath_ = path;
+        } else {
+            setVelocity(new DriveSignal(0, 0), new DriveSignal(0, 0));
+        }
+    }
+
     public synchronized void setOpenLoop(DriveSignal signal) {
-        if (currentDriveState != DriveControlState.OPEN_LOOP) {
+        if (driveControlState_ != DriveControlState.OPEN_LOOP) {
             setBrakeMode(false);
             autoShift_ = true;
             /*
             System.out.println("Switching to open loop");
             System.out.println(signal);
-            currentDriveState = DriveControlState.OPEN_LOOP;
+            driveControlState_ = DriveControlState.OPEN_LOOP;
             leftMaster_.configNeutralDeadband(0.04, 0);
             rightMaster_.configNeutralDeadband(0.04, 0);*/
         }
@@ -236,9 +279,6 @@ public class Drivebase extends Subsystem_Cycle{
         return feedData_.gyro_heading;
     }
 
-    /**
-     * I don't know where it will be used
-     */
     public void registerEnabledLoops(ICycle_in regist) {
         regist.addSubsystem(cycle_);
     }
@@ -249,7 +289,7 @@ public class Drivebase extends Subsystem_Cycle{
      * @param feedforward
      */
     public synchronized void setVelocity(DriveSignal signal, DriveSignal feedforward) {
-        if (currentDriveState != DriveControlState.PATH_FOLLOWING) {
+        if (driveControlState_ != DriveControlState.PATH_FOLLOWING) {
             // We entered a velocity control state.
             setBrakeMode(true);
             autoShift_ = false;
@@ -259,7 +299,7 @@ public class Drivebase extends Subsystem_Cycle{
             leftMaster_.configNeutralDeadband(0.0, 0);
             rightMaster_.configNeutralDeadband(0.0, 0);
 
-            currentDriveState = DriveControlState.OPEN_LOOP;// Wrong Code
+            driveControlState_ = DriveControlState.OPEN_LOOP;// Wrong Code
         }
         feedData_.left_demand = signal.getLeft();
         feedData_.right_demand = signal.getRight();
@@ -283,9 +323,34 @@ public class Drivebase extends Subsystem_Cycle{
         */
     }
 
+    public synchronized void forceDoneWithPath() {
+        if (driveControlState_ == DriveControlState.PATH_FOLLOWING && pathFollower_ != null) {
+            pathFollower_.forceFinish();
+        } else {
+            System.out.println("Robot is not in path following mode");
+        }
+    }
+
+    public synchronized boolean hasPassedMarker(String marker) {
+        if (driveControlState_ == DriveControlState.PATH_FOLLOWING && pathFollower_ != null) {
+            return pathFollower_.hasPassedMarker(marker);
+        } else {
+            System.out.println("Robot is not in path following mode");
+            return false;
+        }
+    }
+
     public enum DriveControlState {
-        OPEN_LOOP, // percent output control
-        PATH_FOLLOWING, // motion profile control
+        OPEN_LOOP, // open loop voltage control
+        PATH_FOLLOWING, // velocity PID control
+    }
+
+    public enum DriveCurrentLimitState {
+        UNTHROTTLED, THROTTLED
+    }
+
+    public enum ShifterState {
+        FORCE_LOW_GEAR, FORCE_HIGH_GEAR
     }
 
     public static class FeedData {
@@ -312,11 +377,6 @@ public class Drivebase extends Subsystem_Cycle{
         public double right_demand;
         //public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<Pose2dWithCurvature>(Pose2dWithCurvature.identity());
     }
-    public enum ShifterState {
-        FORCE_LOW_GEAR,
-        FORCE_HIGH_GEAR,
-        AUTO_SHIFT
-    }
 
     /**
      * override from iSubsystem
@@ -324,8 +384,8 @@ public class Drivebase extends Subsystem_Cycle{
      */
     @Override
     public synchronized void move_subsystem(){
-        //System.out.println(currentDriveState);
-        if (currentDriveState == DriveControlState.OPEN_LOOP) {
+        //System.out.println(driveControlState_);
+        if (driveControlState_ == DriveControlState.OPEN_LOOP) {
             /*
             leftMaster_.set(ControlMode.PercentOutput, feedData_.left_demand, DemandType.ArbitraryFeedForward, 0.0);
             rightMaster_.set(ControlMode.PercentOutput, feedData_.right_demand, DemandType.ArbitraryFeedForward, 0.0);

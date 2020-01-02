@@ -32,4 +32,5 @@ public abstract class Subsystem_Cycle{
     public void registerEnabledLoops(ICycle_in enabledLooper){}
 
     public void sendDataToSmartDashboard(){}
+
 }

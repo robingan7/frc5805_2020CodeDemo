@@ -12,7 +12,7 @@ import static frc.lib.utility.Utility.EPSILON;
  * <p>
  * Inspired by Sophus (https://github.com/strasdat/Sophus/tree/master/sophus)
  */
-public class Rotation2D implements InterpolateSingle<Rotation2D> {
+public class Rotation2D implements Interpolable<Rotation2D> {
     protected static final Rotation2D kIdentity = new Rotation2D();
 
     public static Rotation2D identity() {

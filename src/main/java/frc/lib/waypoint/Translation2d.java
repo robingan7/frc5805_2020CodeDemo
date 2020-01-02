@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 /**
  * A translation in a 2d coordinate frame. Translations are simply shifts in an (x, y) plane.
  */
-public class Translation2D implements InterpolateSingle<Translation2D> {
+public class Translation2D implements Interpolable<Translation2D> {
     protected static final Translation2D kIdentity = new Translation2D();
 
     public static Translation2D identity() {
