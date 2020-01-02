@@ -1,6 +1,7 @@
 package frc.robot.auton;
 
 import frc.robot.auton.autoOptions.AutoOptionBase;
+import frc.robot.auton.autoOptions.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -68,18 +69,19 @@ public class AutoChooser{
     }
 
     private Optional<AutoOptionBase> getAutoModeForParams(DesiredMode mode, StartingPosition position) {
-        /*
+        
         switch (mode) {
-            case DO_NOTHING:
-                return Optional.of(new DoNothingMode());
-            case DRIVE_BY_CAMERA:
-                return Optional.of(new DriveByCameraMode());
             case SIDE_CARGO_SHIP_HATCH:
                 return Optional.of(new SideCargoShipHatchMode(startingLeft(position),
                         startingHab1(position)));
+            /*    
             case FRONT_THEN_SIDE_CARGO_SHIP:
                 return Optional.of(new FrontThenSideCargoShipMode(
                         startingLeft(position), startingHab1(position)));
+            case DO_NOTHING:
+                return Optional.of(new DoNothingMode());
+            case DRIVE_BY_CAMERA:
+                return Optional.of(new DriveByCameraMode());        
             case LOW_ROCKET:
                 return Optional.of(new RocketHatchMode(startingLeft(position), startingHab1(position)));
             case TEST_CONTROL_FLOW:
@@ -87,12 +89,12 @@ public class AutoChooser{
             case DRIVE_CHARACTERIZATION_STRAIGHT:
                 return Optional.of(new CharacterizeDrivebaseMode(true, false, false));
             case DRIVE_CHARACTERIZATION_TURN:
-                return Optional.of(new CharacterizeDrivebaseMode(true, false, true));
+                return Optional.of(new CharacterizeDrivebaseMode(true, false, true));*/
             default:
                 break;
         }
 
-        System.err.println("No valid auto mode found for  " + mode);*/
+        System.err.println("No valid auto mode found for  " + mode);
         return Optional.empty();
     }
 
