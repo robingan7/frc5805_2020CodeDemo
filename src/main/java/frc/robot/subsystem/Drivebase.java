@@ -125,7 +125,6 @@ public class Drivebase extends Subsystem_Cycle{
         telep_drive = new DifferentialDrive(new SpeedControllerGroup(leftMaster_, leftSlaveA_,leftSlaveB_), 
                                         new SpeedControllerGroup(rightMaster_, rightSlaveA_,rightSlaveB_));
 
-         
          gearShifter_ = new Solenoid(Constants.kGearShifter);
          frontLifter_ = new Solenoid(Constants.kFrontLifter);
          backLifter_ = new Solenoid(Constants.kBackLifter);
@@ -133,8 +132,9 @@ public class Drivebase extends Subsystem_Cycle{
          isHighGear_ = false;
          isBackLifted_ = false;
          isFrontLifted_ = false;
+
+         resetGains();
     }
-    
     
     public synchronized void setBrakeMode(boolean on) {
         if (isBrakeMode_ != on) {
@@ -267,8 +267,9 @@ public class Drivebase extends Subsystem_Cycle{
             leftMaster_.configNeutralDeadband(0.04, 0);
             rightMaster_.configNeutralDeadband(0.04, 0);*/
         }
-        //feedData_.left_demand = signal.getLeft();
-        //feedData_.right_demand = signal.getRight();
+        feedData_.left_demand = 0.0;
+        feedData_.right_demand = 0.0;
+
         feedData_.xspeed = signal.getSpeed();
         feedData_.zrotation = signal.getRotation();
 
@@ -343,6 +344,20 @@ public class Drivebase extends Subsystem_Cycle{
         }
     }
 
+    public synchronized void resetGains() {
+        leftMaster_.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
+        leftMaster_.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
+
+        rightMaster_.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
+        rightMaster_.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
+    }
+
     public enum DriveControlState {
         OPEN_LOOP, // open loop voltage control
         PATH_FOLLOWING, // velocity PID control
@@ -399,6 +414,7 @@ public class Drivebase extends Subsystem_Cycle{
                     feedData_.left_feedforward + Constants.kDriveLowGearVelocityKd * feedData_.left_accel / 1023.0);
             rightMaster_.set(ControlMode.Velocity, feedData_.right_demand, DemandType.ArbitraryFeedForward,
                     feedData_.right_feedforward + Constants.kDriveLowGearVelocityKd * feedData_.right_accel / 1023.0);
+            System.out.println("left: " + feedData_.left_demand + " || right: " + feedData_.right_demand);
         }
     }
 

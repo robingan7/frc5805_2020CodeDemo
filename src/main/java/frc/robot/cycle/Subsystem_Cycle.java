@@ -22,8 +22,6 @@ public abstract class Subsystem_Cycle{
     public void update_subsystem() {}
 
     public abstract boolean checkSubsystem();
-    /*
-    public abstract void outputTelemetry();*/
 
     public abstract void stop();
 

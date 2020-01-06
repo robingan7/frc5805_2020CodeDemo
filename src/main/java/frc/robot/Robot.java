@@ -81,6 +81,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     try{
       infrastructure_.setIsManualControl(true);
+      enabledLooper_.start_all();
+      disabledLooper_.stop_all();
 
       // Robot starts forwards.
       robotState_.reset(Timer.getFPGATimestamp(), Pose2D.getDefault(), Rotation2D.getDefault());
@@ -198,7 +200,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() { 
     try{
-      disabledLooper_.stop_all();
+      disabledLooper_.start_all();
 
       if (autoModeActivator_ != null) {
           autoModeActivator_.stop();
