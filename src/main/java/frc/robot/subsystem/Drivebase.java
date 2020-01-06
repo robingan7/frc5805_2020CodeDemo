@@ -20,7 +20,8 @@ import frc.robot.cycle.Subsystem_Cycle;
 import frc.lib.path.Path;
 import frc.lib.path.Lookahead;
 import frc.lib.path.PathFollower;
-
+import frc.robot.statesAndMachanics.RobotState;
+import frc.robot.statesAndMachanics.Kinematics;
 
 public class Drivebase extends Subsystem_Cycle{
     private final WPI_TalonSRX leftMaster_, rightMaster_;
@@ -28,7 +29,7 @@ public class Drivebase extends Subsystem_Cycle{
 
     private static Drivebase instance_;
     private FeedData feedData_;
-    private PigeonIMU mPigeonIMU;
+    private PigeonIMU pigeonIMU_;
     private DifferentialDrive telep_drive;
     private final Solenoid gearShifter_;
     private final Solenoid frontLifter_;
@@ -37,7 +38,7 @@ public class Drivebase extends Subsystem_Cycle{
     private static final int kLowGearVelocityControlSlot = 0;
     private static final int kHighGearVelocityControlSlot = 1;
 
-    private Rotation2D mGyroOffset = Rotation2D.identity();
+    private Rotation2D mGyroOffset = Rotation2D.getDefault();
 
     private DriveControlState driveControlState_;
     private boolean isBrakeMode_, isHighGear_, isFrontLifted_, isBackLifted_, autoShift_;
@@ -64,7 +65,9 @@ public class Drivebase extends Subsystem_Cycle{
                     case OPEN_LOOP:
                         break;
                     case PATH_FOLLOWING:
-                        //updatePathFollower(); let's get it done
+                        if (pathFollower_ != null) {
+                            updatePathFollower(timestamp);
+                        }
                         break;
                     default:
                         System.out.println("Unexpected drive control state: " + driveControlState_);
@@ -116,7 +119,7 @@ public class Drivebase extends Subsystem_Cycle{
                  Constants.kRightDriveMasterId);
          //rightSlaveB_.setInverted(true);
  
-         mPigeonIMU = new PigeonIMU(leftMaster_);
+         pigeonIMU_ = new PigeonIMU(leftMaster_);
         //It was a slave motor in 254's code
 
         telep_drive = new DifferentialDrive(new SpeedControllerGroup(leftMaster_, leftSlaveA_,leftSlaveB_), 
@@ -130,8 +133,6 @@ public class Drivebase extends Subsystem_Cycle{
          isHighGear_ = false;
          isBackLifted_ = false;
          isFrontLifted_ = false;
-         setGains();
- 
     }
     
     
@@ -213,7 +214,7 @@ public class Drivebase extends Subsystem_Cycle{
     }
 
     public void resetSensors() {
-        setHeading(Rotation2D.identity());
+        setHeading(Rotation2D.getDefault());
         resetEncoders();
         autoShift_ = true;
 
@@ -238,7 +239,7 @@ public class Drivebase extends Subsystem_Cycle{
      */
     public synchronized void setWantDrivePath(Path path, boolean reversed) {
         if (currentPath_ != path || driveControlState_ != DriveControlState.PATH_FOLLOWING) {
-            //RobotState.getInstance().resetDistanceDriven();
+            RobotState.getInstance().resetDistanceDriven();
             pathFollower_ = new PathFollower(path, reversed, new PathFollower.Parameters(
                     new Lookahead(Constants.kMinLookAhead, Constants.kMaxLookAhead, Constants.kMinLookAheadSpeed,
                             Constants.kMaxLookAheadSpeed),
@@ -268,11 +269,30 @@ public class Drivebase extends Subsystem_Cycle{
         }
         //feedData_.left_demand = signal.getLeft();
         //feedData_.right_demand = signal.getRight();
-        feedData_.xspeed=signal.getSpeed();
-        feedData_.zrotation=signal.getRotation();
+        feedData_.xspeed = signal.getSpeed();
+        feedData_.zrotation = signal.getRotation();
 
         feedData_.left_feedforward = 0.0;
         feedData_.right_feedforward = 0.0;
+    }
+
+    private void updatePathFollower(double timestamp) {
+        if (driveControlState_ == DriveControlState.PATH_FOLLOWING) {
+            RobotState robot_state = RobotState.getInstance();
+            Pose2D field_to_vehicle = robot_state.getLatestFieldToVehicle().getValue();
+            Twist2D command = pathFollower_.update(timestamp, field_to_vehicle, robot_state.getDistanceDriven(),
+                    robot_state.getPredictedVelocity().dx);
+            if (!pathFollower_.isFinished()) {
+                DriveSignal setpoint = Kinematics.inverseKinematics(command);
+                setVelocity(setpoint, new DriveSignal(0, 0));
+            } else {
+                if (!pathFollower_.isForceFinished()) {
+                    setVelocity(new DriveSignal(0, 0), new DriveSignal(0, 0));
+                }
+            }
+        } else {
+            DriverStation.reportError("drive is not in path following state", false);
+        }
     }
 
     public synchronized Rotation2D getHeading() {
@@ -290,37 +310,20 @@ public class Drivebase extends Subsystem_Cycle{
      */
     public synchronized void setVelocity(DriveSignal signal, DriveSignal feedforward) {
         if (driveControlState_ != DriveControlState.PATH_FOLLOWING) {
-            // We entered a velocity control state.
+            driveControlState_ = DriveControlState.PATH_FOLLOWING;
             setBrakeMode(true);
             autoShift_ = false;
             
+            /*
             leftMaster_.selectProfileSlot(kLowGearVelocityControlSlot, 0);
             rightMaster_.selectProfileSlot(kLowGearVelocityControlSlot, 0);
             leftMaster_.configNeutralDeadband(0.0, 0);
-            rightMaster_.configNeutralDeadband(0.0, 0);
-
-            driveControlState_ = DriveControlState.OPEN_LOOP;// Wrong Code
+            rightMaster_.configNeutralDeadband(0.0, 0);*/
         }
         feedData_.left_demand = signal.getLeft();
         feedData_.right_demand = signal.getRight();
         feedData_.left_feedforward = feedforward.getLeft();
         feedData_.right_feedforward = feedforward.getRight();
-    }
-
-    public synchronized void setGains() {
-        /*
-        leftMaster_.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
-        leftMaster_.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
-        leftMaster_.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
-        leftMaster_.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
-        leftMaster_.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
-
-        rightMaster_.config_kP(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKp, Constants.kLongCANTimeoutMs);
-        rightMaster_.config_kI(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKi, Constants.kLongCANTimeoutMs);
-        rightMaster_.config_kD(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKd, Constants.kLongCANTimeoutMs);
-        rightMaster_.config_kF(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityKf, Constants.kLongCANTimeoutMs);
-        rightMaster_.config_IntegralZone(kLowGearVelocityControlSlot, Constants.kDriveLowGearVelocityIZone, Constants.kLongCANTimeoutMs);
-        */
     }
 
     public synchronized void forceDoneWithPath() {
@@ -355,14 +358,17 @@ public class Drivebase extends Subsystem_Cycle{
 
     public static class FeedData {
         // Motion Profile Feedback
+        public double timestamp;
         public int left_position_ticks;
         public int right_position_ticks;
         public double left_distance;
         public double right_distance;
         public int left_velocity_ticks_per_100ms;
         public int right_velocity_ticks_per_100ms;
-        public Rotation2D gyro_heading = Rotation2D.identity();
-        public Pose2D error = Pose2D.identity();
+        public Rotation2D gyro_heading = Rotation2D.getDefault();
+        public Pose2D error = Pose2D.getDefault();
+        public double left_voltage;
+        public double right_voltage;
 
         // Motion Profile Feedforward 
         public double left_accel;
@@ -375,7 +381,7 @@ public class Drivebase extends Subsystem_Cycle{
         public double zrotation;
         public double left_demand;
         public double right_demand;
-        //public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<Pose2dWithCurvature>(Pose2dWithCurvature.identity());
+        //public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<Pose2dWithCurvature>(Pose2dWithCurvature.getDefault());
     }
 
     /**
@@ -386,10 +392,6 @@ public class Drivebase extends Subsystem_Cycle{
     public synchronized void move_subsystem(){
         //System.out.println(driveControlState_);
         if (driveControlState_ == DriveControlState.OPEN_LOOP) {
-            /*
-            leftMaster_.set(ControlMode.PercentOutput, feedData_.left_demand, DemandType.ArbitraryFeedForward, 0.0);
-            rightMaster_.set(ControlMode.PercentOutput, feedData_.right_demand, DemandType.ArbitraryFeedForward, 0.0);
-            */
             telep_drive.arcadeDrive(feedData_.xspeed, feedData_.zrotation);
             //System.out.println(feedData_.xspeed + " " + feedData_.zrotation);
         } else {
@@ -402,35 +404,30 @@ public class Drivebase extends Subsystem_Cycle{
 
     @Override
     public synchronized void update_subsystem(){
+        feedData_.timestamp = Timer.getFPGATimestamp();
+        double prevLeftTicks = feedData_.left_position_ticks;
+        double prevRightTicks = feedData_.right_position_ticks;
+
         /*
-            double prevLeftTicks = feedData_.left_position_ticks;
-            double prevRightTicks = feedData_.right_position_ticks;
-            feedData_.left_position_ticks = leftMaster_.getSelectedSensorPosition(0);
-            feedData_.right_position_ticks = rightMaster_.getSelectedSensorPosition(0);
-            feedData_.left_velocity_ticks_per_100ms = leftMaster_.getSelectedSensorVelocity(0);
-            feedData_.right_velocity_ticks_per_100ms = rightMaster_.getSelectedSensorVelocity(0);
-            //feedData_.gyro_heading = Rotation2D.fromAngle(mPigeonIMU.getFusedHeading()).rotateFromAnother(mGyroOffset);
-    
-            double deltaLeftTicks = ((feedData_.left_position_ticks - prevLeftTicks) / 4096.0) * Math.PI;
-            if (deltaLeftTicks > 0.0) {
-                feedData_.left_distance += deltaLeftTicks * Constants.kDriveWheelDiameterInches;
-            } else {
-                feedData_.left_distance += deltaLeftTicks * Constants.kDriveWheelDiameterInches;
-            }
-    
-            double deltaRightTicks = ((feedData_.right_position_ticks - prevRightTicks) / 4096.0) * Math.PI;
-            if (deltaRightTicks > 0.0) {
-                feedData_.right_distance += deltaRightTicks * Constants.kDriveWheelDiameterInches;
-            } else {
-                feedData_.right_distance += deltaRightTicks * Constants.kDriveWheelDiameterInches;
-            }*/
-    
-            /* // no idea what that is
-            if (mCSVWriter != null) {
-                mCSVWriter.add(feedData_);
-            }*/
-    
-            // System.out.println("control state: " + mDriveControlState + ", left: " + feedData_.left_demand + ", right: " + feedData_.right_demand);
+        feedData_.left_voltage = leftMaster_.getAppliedOutput() * leftMaster_.getBusVoltage();
+        feedData_.right_voltage = rightMaster_.getAppliedOutput() * rightMaster_.getBusVoltage();
+
+        feedData_.left_position_ticks = mLeftEncoder.get();
+        feedData_.right_position_ticks = mRightEncoder.get();
+        feedData_.gyro_heading = Rotation2d.fromDegrees(pigeonIMU_.getFusedHeading()).rotateBy(mGyroOffset);
+
+        double deltaLeftTicks = ((feedData_.left_position_ticks - prevLeftTicks) / Constants.kDriveEncoderPPR)
+                * Math.PI;
+        feedData_.left_distance += deltaLeftTicks * Constants.kDriveWheelDiameterInches;
+
+        double deltaRightTicks = ((feedData_.right_position_ticks - prevRightTicks) / Constants.kDriveEncoderPPR)
+                * Math.PI;
+        feedData_.right_distance += deltaRightTicks * Constants.kDriveWheelDiameterInches;
+
+        feedData_.left_velocity_ticks_per_100ms = (int) (mLeftEncoder.getRate()
+                / (10 * mLeftEncoder.getDistancePerPulse()));
+        feedData_.right_velocity_ticks_per_100ms = (int) (mRightEncoder.getRate()
+                / (10 * mRightEncoder.getDistancePerPulse()));*/
     }
 
     @Override 

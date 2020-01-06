@@ -14,7 +14,7 @@ import static frc.lib.utility.Utility.EPSILON;
 public class Pose2D implements Interpolable<Pose2D> {
     protected static final Pose2D kIdentity = new Pose2D();
 
-    public static Pose2D identity() {
+    public static Pose2D getDefault() {
         return kIdentity;
     }
 

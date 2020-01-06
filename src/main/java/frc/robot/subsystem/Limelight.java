@@ -29,8 +29,8 @@ public class Limelight extends Subsystem_Cycle {
         public String kName = "";
         public String kTableName = "";
         public double kHeight = 0.0;
-        public Pose2D kTurretToLens = Pose2D.identity();
-        public Rotation2D kHorizontalPlaneToLens = Rotation2D.identity();
+        public Pose2D kTurretToLens = Pose2D.getDefault();
+        public Rotation2D kHorizontalPlaneToLens = Rotation2D.getDefault();
     }
 
     private NetworkTable mNetworkTable;

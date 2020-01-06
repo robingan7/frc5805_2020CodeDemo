@@ -15,7 +15,7 @@ public class AdaptivePurePursuitController {
     private static final double kReallyBigNumber = 1E6;
 
     public static class Command {
-        public Twist2D delta = Twist2D.identity();
+        public Twist2D delta = Twist2D.getDefault();
         public double cross_track_error;
         public double max_velocity;
         public double end_velocity;
@@ -61,7 +61,7 @@ public class AdaptivePurePursuitController {
         final Path.TargetPointReport report = mPath.getTargetPoint(pose.getTranslation(), mLookahead);
         if (isFinished()) {
             // Stop.
-            return new Command(Twist2D.identity(), report.closest_point_distance, report.max_speed, 0.0,
+            return new Command(Twist2D.getDefault(), report.closest_point_distance, report.max_speed, 0.0,
                     report.lookahead_point, report.remaining_path_distance);
         }
 

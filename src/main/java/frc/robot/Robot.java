@@ -15,6 +15,9 @@ import frc.robot.auton.AutoActivator;
 import frc.robot.auton.AutoChooser;
 import frc.robot.auton.autoOptions.AutoOptionBase;
 import frc.robot.statesAndMachanics.SuperStructureCommand;
+import frc.robot.statesAndMachanics.RobotState;
+import frc.lib.waypoint.Rotation2D;
+import frc.lib.waypoint.Pose2D;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -26,6 +29,7 @@ public class Robot extends TimedRobot {
   private SM_Driver sm_driver_ = new SM_Driver();
   private MainControlBoard controlBoard_ = MainControlBoard.getInstance();
 
+  private final RobotState robotState_ = RobotState.getInstance();
   private final Arm arm_ = Arm.getInstance();
   private final Wrist wrist_ = Wrist.getInstance();
   private final Infrastructure infrastructure_ = Infrastructure.getInstance();
@@ -42,14 +46,16 @@ public class Robot extends TimedRobot {
   );
   private AutoChooser autoModeChooser_ = new AutoChooser();
   private AutoActivator autoModeActivator_;
-  private boolean driveByCameraInAuto_ = false;
   
   @Override
   public void robotInit() {
     try{
       drivebase_.resetSensors();
-      //SuperStructureCommand.goToScoreDiskHigh(true);
-
+      
+      // Robot starts forwards.
+      robotState_.reset(Timer.getFPGATimestamp(), Pose2D.getDefault(), Rotation2D.getDefault());
+      drivebase_.setHeading(Rotation2D.getDefault());
+ 
       subsystem_Cycle_Manager_.registerEnabledLoops(enabledLooper_);
       subsystem_Cycle_Manager_.registerDisabledLoops(disabledLooper_);
       SuperStructureCommand.goToScoreDiskLow(false);
@@ -62,17 +68,36 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    try {
+      subsystem_Cycle_Manager_.sendDataToSmartDashboard();
+      robotState_.outputToSmartDashboard();
+      autoModeChooser_.outputToSmartDashboard();
+    } catch (Throwable t) {
+        throw t;
+    }
   }
 
   @Override
   public void autonomousInit() {
     try{
-      infrastructure_.setIsManualControl(true); 
+      infrastructure_.setIsManualControl(true);
+
+      // Robot starts forwards.
+      robotState_.reset(Timer.getFPGATimestamp(), Pose2D.getDefault(), Rotation2D.getDefault());
+      drivebase_.setHeading(Rotation2D.getDefault());
+
+      Optional<AutoOptionBase> autoMode = autoModeChooser_.getAutoOption();
+      if (autoMode.isPresent() && autoMode.get() != autoModeActivator_.getAutoOption()) {
+          System.out.println("Set auto mode to: " + autoMode.get().getClass().toString());
+          autoModeActivator_.setAutoOption(autoMode.get());
+      }
+
+      autoModeActivator_.start();
     }catch(Throwable t){
       throw t;
     }
-   
   }
+
   @Override
   public void autonomousPeriodic() {
     try{
@@ -81,6 +106,7 @@ public class Robot extends TimedRobot {
       throw t;
     }
   }
+
   @Override
   public void teleopInit() {
     SmartDashboard.putString("Robot State", "Start driving");
@@ -128,7 +154,6 @@ public class Robot extends TimedRobot {
 
     } else if(controlBoard_.getOperatorJoystick().isDefense()){
       SuperStructureCommand.goToDefense();
-
     }
 
     if(isChangingGear) {
@@ -195,8 +220,7 @@ public class Robot extends TimedRobot {
       // Update auto modes
       autoModeChooser_.updateModeCreator();
 
-      Optional<AutoOptionBase> autoMode = autoModeChooser_.getAutoMode();
-      driveByCameraInAuto_ = autoModeChooser_.isDriveByCamera();
+      //Optional<AutoOptionBase> autoMode = autoModeChooser_.getAutoOption();
     }catch (Throwable t) {
         throw t;
     }

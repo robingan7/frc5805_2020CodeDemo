@@ -78,7 +78,7 @@ public class Cycle_in implements ICycle_in{
     }
 
     @Override
-    public void sendAllDataToSmartDashboard() {
+    public void sendDataToSmartDashboard() {
         SmartDashboard.putNumber("cycle_in_dt", dt_);
     }
 }

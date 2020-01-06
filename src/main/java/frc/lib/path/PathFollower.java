@@ -94,7 +94,7 @@ public class PathFollower {
      */
     public PathFollower(Path path, boolean reversed, Parameters parameters) {
         mSteeringController = new AdaptivePurePursuitController(path, reversed, parameters.lookahead);
-        mLastSteeringDelta = Twist2D.identity();
+        mLastSteeringDelta = Twist2D.getDefault();
         mVelocityController = new MotionProfileFollower(parameters.profile_kp, parameters.profile_ki, parameters.profile_kv,
                 parameters.profile_kffv, parameters.profile_kffa, parameters.profile_ks);
         mVelocityController.setConstraints(

@@ -50,10 +50,10 @@ public class SideCargoShipHatchMode extends AutoOptionBase {
                             new LambdaAction(() -> SuperStructureCommand.goToScoreDiskLow(true)))));
             runAction(new DriveOpenLoopAction(-0.15, -0.15, 0.725));
             runAction(new LambdaAction(() ->
-                    RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2D.identity(), Rotation2D.identity())
+                    RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2D.getDefault(), Rotation2D.getDefault())
             ));
 
-            runAction(new LambdaAction(() -> Drivebase.getInstance().setHeading(Rotation2D.identity())));
+            runAction(new LambdaAction(() -> Drivebase.getInstance().setHeading(Rotation2D.getDefault())));
             
             runAction(new ParallelAction(Arrays.asList(second_path,
                     new SeriesAction(Arrays.asList(

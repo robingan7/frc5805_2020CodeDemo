@@ -72,7 +72,7 @@ public class RobotState {
     List<Translation2D> mCameraToVisionTargetPosesHigh = new ArrayList<>();
 
     private RobotState() {
-        reset(0.0, Pose2D.identity(), Rotation2D.identity());
+        reset(0.0, Pose2D.getDefault(), Rotation2D.getDefault());
     }
 
     /**
@@ -86,14 +86,14 @@ public class RobotState {
     public synchronized void reset(double start_time, Pose2D initial_field_to_vehicle) {
         field_to_vehicle_ = new InterpolatingTreeMap<>(kObservationBufferSize);
         field_to_vehicle_.put(new InterpolatingDouble(start_time), initial_field_to_vehicle);
-        vehicle_velocity_predicted_ = Twist2D.identity();
-        vehicle_velocity_measured_ = Twist2D.identity();
+        vehicle_velocity_predicted_ = Twist2D.getDefault();
+        vehicle_velocity_measured_ = Twist2D.getDefault();
         vehicle_velocity_measured_filtered_ = new MovingAverageTwist2D(25);
         distance_driven_ = 0.0;
     }
 
     public synchronized void reset() {
-        reset(Timer.getFPGATimestamp(), Pose2D.identity(), Rotation2D.identity());
+        reset(Timer.getFPGATimestamp(), Pose2D.getDefault(), Rotation2D.getDefault());
     }
 
     /**
@@ -160,7 +160,7 @@ public class RobotState {
                 cameraToVisionTargetPoses.get(1), 0.5));
 
         //Pose2D fieldToVisionTarget = getFieldToTurret(timestamp).transformBy(source.getTurretToLens()).transformBy(cameraToVisionTarget);
-        //tracker.update(timestamp, List.of(new Pose2D(fieldToVisionTarget.getTranslation(), Rotation2D.identity())));
+        //tracker.update(timestamp, List.of(new Pose2D(fieldToVisionTarget.getTranslation(), Rotation2D.getDefault())));
     }
 
     public synchronized void addVisionUpdate(double timestamp, List<TargetInfo> observations, Limelight source) {
@@ -262,7 +262,7 @@ public class RobotState {
         //     return Pose2D.fromTranslation(new Translation2D(-6.0, 0.0));
         // }
 
-        return Pose2D.identity();
+        return Pose2D.getDefault();
     }
 
     public synchronized void outputToSmartDashboard() {

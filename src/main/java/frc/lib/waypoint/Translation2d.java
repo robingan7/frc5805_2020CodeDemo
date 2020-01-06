@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
 public class Translation2D implements Interpolable<Translation2D> {
     protected static final Translation2D kIdentity = new Translation2D();
 
-    public static Translation2D identity() {
+    public static Translation2D getDefault() {
         return kIdentity;
     }
 

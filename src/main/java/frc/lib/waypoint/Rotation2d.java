@@ -15,7 +15,7 @@ import static frc.lib.utility.Utility.EPSILON;
 public class Rotation2D implements Interpolable<Rotation2D> {
     protected static final Rotation2D kIdentity = new Rotation2D();
 
-    public static Rotation2D identity() {
+    public static Rotation2D getDefault() {
         return kIdentity;
     }
 

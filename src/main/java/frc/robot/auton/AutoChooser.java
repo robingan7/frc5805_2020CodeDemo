@@ -108,7 +108,7 @@ public class AutoChooser{
         SmartDashboard.putString("StartingPositionSelected", mCachedStartingPosition.name());
     }
 
-    public Optional<AutoOptionBase> getAutoMode() {
+    public Optional<AutoOptionBase> getAutoOption() {
         return autoOption_;
     }
 

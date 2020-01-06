@@ -57,7 +57,7 @@ public class AutoActivator{
         autoStarter_ = null;
     }
 
-    public AutoOptionBase getAutoMode() {
+    public AutoOptionBase getAutoOption() {
         return currentOption_;
     }
 

@@ -30,7 +30,7 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
             allSubsystems_.forEach(Subsystem_Cycle::update_subsystem);
             cycles_.forEach(c -> c.onLoop(timestamp));
             allSubsystems_.forEach(Subsystem_Cycle::move_subsystem);
-            sendAllDataToSmartDashboard();
+            sendDataToSmartDashboard();
         }
         @Override
         public void onStop(double timestamp) {
@@ -69,7 +69,7 @@ public class Subsystem_Cycle_Manager implements ICycle_in{
     }
 
     @Override
-    public void sendAllDataToSmartDashboard(){
+    public void sendDataToSmartDashboard(){
         allSubsystems_.forEach(Subsystem_Cycle::sendDataToSmartDashboard);
     }
 
