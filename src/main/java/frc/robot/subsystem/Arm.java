@@ -10,14 +10,14 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import frc.robot.Constants;
 import static frc.robot.Constants.SuperStructureConstants;
 import frc.lib.motor.MotorUtility;
-import frc.lib.utility.TestIfChanged;
+import frc.lib.utility.LatchBoolean;
 
 public class Arm extends SingleMasterMotorSystem{
     private static Arm instance_;
 
     private boolean isBackingToInitialMode_ = false;
     private boolean canBackToInitalMode_ = true;
-    private TestIfChanged changeTester = new TestIfChanged();
+    private LatchBoolean changeTester = new LatchBoolean();
     private int level1;
     private int vertex;//the point where wrist 
 
@@ -64,7 +64,7 @@ public class Arm extends SingleMasterMotorSystem{
     }
 
     /**
-     * test if the the reverse limit switch is closed to determin whether
+     * getBoolean if the the reverse limit switch is closed to determin whether
      * the arm is at inital mode
      * @return the result
      */
@@ -74,7 +74,7 @@ public class Arm extends SingleMasterMotorSystem{
 
     @Override
     public synchronized void handleMasterReset(boolean reset) {
-        if (changeTester.test(reset) && canBackToInitalMode_) {
+        if (changeTester.getBoolean(reset) && canBackToInitalMode_) {
             System.out.println("Arm going into home mode!");
             isBackingToInitialMode_ = true;
             //LED.getInstance().setElevatorFault();
